@@ -1,9 +1,9 @@
-# Anki GSAT Card Setup Guide (Dark Mode + Cloze Style)
+# Anki GSAT Card Setup Guide (Shadcn Zinc Dark)
 
-This setup shows the sentences on the front with **collocations hidden** (cloze style) and reveals everything automatically on the back in a dark theme.
+This setup uses a modern, minimalist "Shadcn UI" aesthetic. It features a Zinc color palette, subtle borders, and a clean card-based layout.
 
 ## 1. Create Note Type
-- Create a Note Type `GSAT-Dark-Cloze` with two fields: `Front` and `Back`.
+- Create a Note Type `GSAT-Shadcn-Dark` with two fields: `Front` and `Back`.
 - `Front` = Headword
 - `Back` = Generated HTML content
 
@@ -12,27 +12,29 @@ This setup shows the sentences on the front with **collocations hidden** (cloze 
 ## 2. Card Templates
 
 ### Front Template
-The front will show the headword and only the sentences from the back field, but with the collocations hidden.
-
 ```html
 <div class="card front-card">
-  <h1 class="headword">{{Front}}</h1>
+  <div class="header">
+    <span class="badge">Vocabulary</span>
+    <h1 class="headword">{{Front}}</h1>
+  </div>
   
-  <div class="sentences-only">
+  <div class="content-area">
     {{Back}}
   </div>
 </div>
 ```
 
 ### Back Template
-The back shows everything, revealing the collocations and adding translations.
-
 ```html
 <div class="card back-card">
-  <h1 class="headword">{{Front}}</h1>
-  <hr id="answer">
+  <div class="header">
+    <span class="badge">Vocabulary</span>
+    <h1 class="headword">{{Front}}</h1>
+  </div>
+  <hr class="separator">
   
-  <div class="full-content">
+  <div class="content-area">
     {{Back}}
   </div>
 </div>
@@ -40,126 +42,180 @@ The back shows everything, revealing the collocations and adding translations.
 
 ---
 
-## 3. Styling (Dark Mode CSS)
-Copy this into your Anki Note Type's **Styling** section. It uses CSS to hide specific elements on the front and show them on the back.
+## 3. Styling (Shadcn Zinc CSS)
+Copy this into your Anki Note Type's **Styling** section.
 
 ```css
-/* Base Dark Mode Styling */
+/* --- Shadcn Zinc Dark Theme --- */
+
 .card {
-  font-family: "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
-  font-size: 19px;
-  text-align: left;
-  background-color: #121212; /* Deep Black */
-  color: #e0e0e0; /* Off-white text */
-  line-height: 1.6;
-  max-width: 650px;
+  --background: 240 10% 3.9%;    /* Zinc 950 */
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --primary: 0 0% 98%;           /* Zinc 50 */
+  --muted: 240 3.7% 15.9%;       /* Zinc 800ish */
+  --muted-foreground: 240 5% 64.9%; /* Zinc 400 */
+  --accent: 217.2 91.2% 59.8%;   /* Modern Blue */
+  --border: 240 3.7% 15.9%;
+  
+  font-family: "Geist", "Inter", "Segoe UI", "PingFang TC", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: hsl(var(--background));
+  color: hsl(var(--card-foreground));
+  line-height: 1.5;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 32px 24px;
 }
 
-/* Headword */
-.headword {
-  font-size: 2.2em;
-  color: #bb86fc; /* Material Purple */
+/* Header & Typography */
+.header {
   text-align: center;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #3700b3;
+  margin-bottom: 24px;
 }
 
-/* Sentence Containers */
-.entry {
-  background: #1e1e1e;
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--accent));
+  background: hsla(217, 91%, 60%, 0.1);
+  padding: 4px 12px;
+  border-radius: 9999px;
+  margin-bottom: 12px;
+}
+
+.headword {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: hsl(var(--primary));
+}
+
+.separator {
+  border: 0;
+  border-top: 1px solid hsl(var(--border));
+  margin: 24px 0;
+}
+
+/* Usage Note (General Explanation) */
+.general-explanation {
+  font-size: 14px;
+  padding: 16px;
+  background: hsl(240, 4%, 9%); /* Zinc 900ish */
+  border: 1px solid hsl(var(--border));
   border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-left: 4px solid #03dac6; /* Teal accent */
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+/* Entry Cards */
+.entry {
+  position: relative;
+  padding: 20px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
 }
 
 .sentence {
-  color: #ffffff;
-  font-size: 1.1em;
-  margin-bottom: 8px;
+  font-size: 17px;
+  font-weight: 400;
+  color: hsl(var(--primary));
+  line-height: 1.6;
 }
 
-/* Target Word & Collocation */
+/* Highlights */
 .target-word {
-  color: #ffb74d; /* Orange */
-  font-weight: bold;
+  color: hsl(var(--accent));
+  font-weight: 600;
 }
 
 .collocation {
-  color: #03dac6; /* Teal */
-  font-weight: bold;
-  border-bottom: 1px dashed #03dac6;
+  font-weight: 600;
+  color: hsl(var(--primary));
+  text-decoration: underline decoration-thickness 2px;
+  text-underline-offset: 4px;
+  text-decoration-color: hsl(var(--accent));
 }
 
-/* Metadata (Translation & Notes) */
+/* Metadata */
 .translation {
-  color: #b0b0b0;
-  font-size: 0.9em;
-  font-style: italic;
-  margin-top: 5px;
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #10b981; /* Emerald 500 */
 }
 
 .entry-explanation {
-  color: #81c784; /* Light Green */
-  font-size: 0.85em;
-  margin-top: 5px;
-  border-top: 1px solid #333;
-  padding-top: 5px;
-}
-
-.general-explanation {
-  background: #2c2c2c;
-  padding: 12px;
-  border-radius: 6px;
-  color: #e0e0e0;
-  margin-bottom: 20px;
-  font-size: 0.9em;
+  margin-top: 8px;
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  border-top: 1px solid hsla(0, 0%, 100%, 0.05);
+  padding-top: 8px;
 }
 
 .related-forms {
-  color: #757575;
-  font-size: 0.8em;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 32px;
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
 }
 
-/* --- LOGIC: Hiding/Showing elements based on Front vs Back --- */
+.related-forms .label {
+  font-weight: 600;
+  color: hsl(var(--primary));
+  margin-right: 4px;
+}
 
-/* On the FRONT: */
+/* --- Logic: Hiding/Showing based on Front vs Back --- */
+
+/* Front Card Specifics */
 .front-card .translation,
 .front-card .entry-explanation,
 .front-card .general-explanation,
 .front-card .related-forms {
-  display: none !important; /* Hide metadata */
+  display: none !important;
 }
 
-/* The "Cloze" effect: Hide collocation text on front */
+/* The Cloze Blank */
 .front-card .collocation {
   color: transparent !important;
-  background-color: #333;
-  border-radius: 3px;
-  border: none;
-  padding: 0 10px;
+  background-color: hsl(var(--muted));
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 0 4px;
+  display: inline-flex;
+  min-width: 60px;
+  height: 1.2em;
+  vertical-align: middle;
 }
 
 .front-card .collocation::after {
-  content: "___";
-  color: #03dac6;
-  font-weight: bold;
+  content: "•••";
+  color: hsl(var(--muted-foreground));
+  font-size: 10px;
+  letter-spacing: 2px;
+  width: 100%;
+  text-align: center;
 }
 
-/* On the BACK: */
-.back-card .collocation {
-  color: #03dac6 !important;
-  background: transparent;
+/* Back Card Adjustments */
+.back-card .entry {
+  border-color: hsla(217, 91%, 60%, 0.2);
 }
 ```
 
 ---
 
-## 4. Run & Import
-1. Execute `python to_anki.py` to refresh your `anki_import.tsv`.
-2. Import into Anki choosing the `GSAT-Dark-Cloze` note type.
-3. Make sure "Allow HTML" is enabled.
+## 4. Import Instructions
+1. Run `python to_anki.py` to generate the latest `anki_import.tsv`.
+2. Import into Anki using the `GSAT-Shadcn-Dark` note type.
+3. Ensure "Allow HTML" is checked.
