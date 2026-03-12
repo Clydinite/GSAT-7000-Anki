@@ -9,33 +9,56 @@ def format_sentence(sentence):
     # Replace *collocation* with <span class="collocation">collocation</span>
     sentence = re.sub(r'\*(.*?)\*', r'<span class="collocation">\1</span>', sentence)
     return sentence
+def escape_js(text):
+    """Safely escape text for use in a single-quoted JS onclick attribute."""
+    return text.replace("\\", "\\\\").replace("'", "\\'").replace('"', '&quot;')
 
 def generate_html(data):
     html = []
     html.append('<div class="anki-card-content">')
-    
+
     # General Explanation (Usage Note)
-    if data.get("explanation"):
-        html.append(f'  <div class="general-explanation">{data["explanation"]}</div>')
-    
+    explanation = data.get("explanation")
+    if explanation:
+        html.append(f'  <div class="general-explanation">{explanation}</div>')
+
     # Entries
     html.append('  <div class="entries-container">')
     for entry in data.get("entries", []):
+        sentence_raw = entry.get("sentence", "")
+        # Clean sentence for TTS: remove the marker characters < > * *
+        clean_tts = sentence_raw.replace("<", "").replace(">", "").replace("*", "")
+        escaped_tts = escape_js(clean_tts)
+
+        formatted_sentence = format_sentence(sentence_raw)
+        translation = entry.get("translation", "")
+        entry_note = entry.get("explanation", "")
+
         html.append('    <div class="entry">')
-        html.append(f'      <div class="sentence">{format_sentence(entry["sentence"])}</div>')
-        html.append(f'      <div class="translation">{entry["translation"]}</div>')
-        if entry.get("explanation"):
-            html.append(f'      <div class="entry-explanation">{entry["explanation"]}</div>')
+        html.append('      <div class="sentence-row">')
+        html.append(f'        <div class="sentence">{formatted_sentence}</div>')
+        html.append(f'        <button class="tts-button" onclick="window.playTTS(\'{escaped_tts}\')">')
+        html.append('          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">')
+        html.append('            <polygon points="5 3 19 12 5 21 5 3"></polygon>')
+        html.append('          </svg>')
+        html.append('        </button>')
+        html.append('      </div>')
+
+        if translation:
+            html.append(f'      <div class="translation">{translation}</div>')
+        if entry_note:
+            html.append(f'      <div class="entry-explanation">{entry_note}</div>')
         html.append('    </div>')
     html.append('  </div>')
-    
+
     # Related Forms
-    if data.get("related_forms"):
-        forms = ", ".join(data["related_forms"])
-        html.append(f'  <div class="related-forms"><span class="label">Related:</span> {forms}</div>')
-    
+    related = data.get("related_forms")
+    if related:
+        forms_str = ", ".join(related)
+        html.append(f'  <div class="related-forms"><span class="label">Related:</span> {forms_str}</div>')
+
     html.append('</div>')
-    return "".join(html)
+    return "\n".join(html)
 
 def convert_to_anki(input_file, output_file):
     if not os.path.exists(input_file):
@@ -48,10 +71,6 @@ def convert_to_anki(input_file, output_file):
         reader = csv.DictReader(f_in, delimiter="\t")
         writer = csv.writer(f_out, delimiter="\t")
         
-        # Anki TSV typically doesn't need a header, but we'll write one for reference 
-        # (Anki allows skipping the first line)
-        # Fields: Front (Headword), Back (HTML)
-        
         count = 0
         for row in reader:
             try:
@@ -59,6 +78,7 @@ def convert_to_anki(input_file, output_file):
                 headword = row["headword"]
                 html_content = generate_html(data)
                 
+                # We output: Word, HTML
                 writer.writerow([headword, html_content])
                 count += 1
             except Exception as e:

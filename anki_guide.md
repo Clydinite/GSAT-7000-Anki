@@ -1,11 +1,9 @@
-# Anki GSAT Card Setup Guide (Shadcn Zinc Dark)
+# Anki GSAT Card Setup Guide (Shadcn + TTS)
 
-This setup uses a modern, minimalist "Shadcn UI" aesthetic. It features a Zinc color palette, subtle borders, and a clean card-based layout.
+This setup uses a Shadcn-inspired Zinc Dark theme with **Auto-TTS for the headword** and **Press-to-Play TTS for sentences**.
 
 ## 1. Create Note Type
-- Create a Note Type `GSAT-Shadcn-Dark` with two fields: `Front` and `Back`.
-- `Front` = Headword
-- `Back` = Generated HTML content
+- Create a Note Type `GSAT-Shadcn-TTS` with fields: `Front` and `Back`.
 
 ---
 
@@ -38,11 +36,38 @@ This setup uses a modern, minimalist "Shadcn UI" aesthetic. It features a Zinc c
     {{Back}}
   </div>
 </div>
+
+<script>
+// Logic for "Press-to-Play" sentences using Web Speech API
+window.playTTS = function(text) {
+  // Stop any currently speaking text
+  window.speechSynthesis.cancel();
+  
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = 0.9; // Slightly slower for clarity
+  
+  // Find a high-quality English voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) 
+                      || voices.find(v => v.lang.startsWith('en'));
+  
+  if (preferredVoice) utterance.voice = preferredVoice;
+  
+  window.speechSynthesis.speak(utterance);
+};
+
+// Required for Chrome/Anki to load voices
+window.speechSynthesis.getVoices();
+
+// Auto-play the headword on flip
+window.playTTS('{{text:Front}}');
+</script>
 ```
 
 ---
 
-## 3. Styling (Shadcn Zinc CSS)
+## 3. Styling (Shadcn Zinc + Buttons)
 Copy this into your Anki Note Type's **Styling** section.
 
 ```css
@@ -102,34 +127,79 @@ Copy this into your Anki Note Type's **Styling** section.
   margin: 24px 0;
 }
 
-/* Usage Note (General Explanation) */
-.general-explanation {
-  font-size: 14px;
-  padding: 16px;
-  background: hsl(240, 4%, 9%); /* Zinc 900ish */
-  border: 1px solid hsl(var(--border));
-  border-radius: 8px;
-  color: hsl(var(--muted-foreground));
-  margin-bottom: 24px;
-  line-height: 1.6;
-}
-
-/* Entry Cards */
+/* Entry Styling */
 .entry {
-  position: relative;
   padding: 20px;
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
   border-radius: 12px;
   margin-bottom: 16px;
-  transition: border-color 0.2s;
+}
+
+.sentence-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .sentence {
   font-size: 17px;
   font-weight: 400;
   color: hsl(var(--primary));
-  line-height: 1.6;
+  flex: 1;
+}
+
+/* Play Button */
+.tts-button {
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.tts-button:hover {
+  background: hsl(var(--accent));
+  color: white;
+  border-color: hsl(var(--accent));
+}
+
+.tts-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Metadata */
+.translation {
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #10b981;
+}
+
+.entry-explanation {
+  margin-top: 8px;
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  padding-top: 8px;
+}
+
+.general-explanation {
+  font-size: 14px;
+  padding: 16px;
+  background: hsl(240, 4%, 9%);
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 24px;
 }
 
 /* Highlights */
@@ -146,38 +216,7 @@ Copy this into your Anki Note Type's **Styling** section.
   text-decoration-color: hsl(var(--accent));
 }
 
-/* Metadata */
-.translation {
-  margin-top: 12px;
-  font-size: 15px;
-  font-weight: 500;
-  color: #10b981; /* Emerald 500 */
-}
-
-.entry-explanation {
-  margin-top: 8px;
-  font-size: 13px;
-  color: hsl(var(--muted-foreground));
-  border-top: 1px solid hsla(0, 0%, 100%, 0.05);
-  padding-top: 8px;
-}
-
-.related-forms {
-  text-align: center;
-  margin-top: 32px;
-  font-size: 13px;
-  color: hsl(var(--muted-foreground));
-}
-
-.related-forms .label {
-  font-weight: 600;
-  color: hsl(var(--primary));
-  margin-right: 4px;
-}
-
-/* --- Logic: Hiding/Showing based on Front vs Back --- */
-
-/* Front Card Specifics */
+/* Logic: Hide on Front */
 .front-card .translation,
 .front-card .entry-explanation,
 .front-card .general-explanation,
@@ -188,34 +227,35 @@ Copy this into your Anki Note Type's **Styling** section.
 /* The Cloze Blank */
 .front-card .collocation {
   color: transparent !important;
+  font-size: 0 !important; /* Collapses the width of the hidden text */
   background-color: hsl(var(--muted));
   text-decoration: none;
   border-radius: 4px;
-  padding: 0 4px;
+  padding: 0 8px;
   display: inline-flex;
-  min-width: 60px;
+  min-width: 36px;
   height: 1.2em;
   vertical-align: middle;
+  align-items: center;
+  justify-content: center;
 }
 
 .front-card .collocation::after {
   content: "•••";
   color: hsl(var(--muted-foreground));
-  font-size: 10px;
-  letter-spacing: 2px;
-  width: 100%;
-  text-align: center;
+  font-size: 12px; /* Restores size for the placeholder dots */
+  letter-spacing: 1px;
 }
 
-/* Back Card Adjustments */
-.back-card .entry {
-  border-color: hsla(217, 91%, 60%, 0.2);
+/* Anki TTS hidden tag styling */
+.anki-tts-label {
+  display: none;
 }
 ```
 
 ---
 
-## 4. Import Instructions
-1. Run `python to_anki.py` to generate the latest `anki_import.tsv`.
-2. Import into Anki using the `GSAT-Shadcn-Dark` note type.
+## 4. Import
+1. Run `python to_anki.py`.
+2. Import `anki_import.tsv` using the `GSAT-Shadcn-TTS` note type.
 3. Ensure "Allow HTML" is checked.
