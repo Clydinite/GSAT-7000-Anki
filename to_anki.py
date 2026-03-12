@@ -9,6 +9,7 @@ def format_sentence(sentence):
     # Replace *collocation* with <span class="collocation">collocation</span>
     sentence = re.sub(r'\*(.*?)\*', r'<span class="collocation">\1</span>', sentence)
     return sentence
+
 def escape_js(text):
     """Safely escape text for use in a single-quoted JS onclick attribute."""
     return text.replace("\\", "\\\\").replace("'", "\\'").replace('"', '&quot;')
@@ -44,10 +45,13 @@ def generate_html(data):
         html.append('        </button>')
         html.append('      </div>')
 
-        if translation:
-            html.append(f'      <div class="translation">{translation}</div>')
-        if entry_note:
-            html.append(f'      <div class="entry-explanation">{entry_note}</div>')
+        if translation or entry_note:
+            html.append('      <div class="meta-section">')
+            if translation:
+                html.append(f'        <div class="translation">{translation}</div>')
+            if entry_note:
+                html.append(f'        <div class="entry-explanation">{entry_note}</div>')
+            html.append('      </div>')
         html.append('    </div>')
     html.append('  </div>')
 

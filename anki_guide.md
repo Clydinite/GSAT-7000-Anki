@@ -83,6 +83,7 @@ Copy this into your Anki Note Type's **Styling** section.
   --muted-foreground: 240 5% 64.9%; /* Zinc 400 */
   --accent: 217.2 91.2% 59.8%;   /* Modern Blue */
   --border: 240 3.7% 15.9%;
+  --success: 142.1 70.6% 45.3%;  /* Emerald 500 */
   
   font-family: "Geist", "Inter", "Segoe UI", "PingFang TC", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -94,6 +95,16 @@ Copy this into your Anki Note Type's **Styling** section.
   padding: 32px 24px;
 }
 
+/* Mobile Padding Adjustment */
+@media (max-width: 480px) {
+  .card {
+    padding: 16px 12px;
+  }
+  .headword {
+    font-size: 32px !important;
+  }
+}
+
 /* Header & Typography */
 .header {
   text-align: center;
@@ -102,7 +113,7 @@ Copy this into your Anki Note Type's **Styling** section.
 
 .badge {
   display: inline-block;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -110,7 +121,7 @@ Copy this into your Anki Note Type's **Styling** section.
   background: hsla(217, 91%, 60%, 0.1);
   padding: 4px 12px;
   border-radius: 9999px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .headword {
@@ -127,8 +138,23 @@ Copy this into your Anki Note Type's **Styling** section.
   margin: 24px 0;
 }
 
-/* Entry Styling */
+/* General Usage Note */
+.general-explanation {
+  font-size: 14px;
+  padding: 16px;
+  background: hsl(240, 4%, 9%); /* Zinc 900ish */
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+/* Entry Container */
 .entry {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   padding: 20px;
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
@@ -136,6 +162,7 @@ Copy this into your Anki Note Type's **Styling** section.
   margin-bottom: 16px;
 }
 
+/* Sentence Area */
 .sentence-row {
   display: flex;
   justify-content: space-between;
@@ -145,9 +172,9 @@ Copy this into your Anki Note Type's **Styling** section.
 
 .sentence {
   font-size: 17px;
-  font-weight: 400;
+  font-weight: 500;
   color: hsl(var(--primary));
-  flex: 1;
+  line-height: 1.5;
 }
 
 /* Play Button */
@@ -163,7 +190,7 @@ Copy this into your Anki Note Type's **Styling** section.
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .tts-button:hover {
@@ -177,57 +204,59 @@ Copy this into your Anki Note Type's **Styling** section.
   height: 16px;
 }
 
-/* Metadata */
+/* Meta Section (Translation & Explanation) */
+.meta-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 12px;
+  border-left: 2px solid hsl(var(--success));
+  background: hsla(142, 70%, 45%, 0.03);
+  margin-top: 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
 .translation {
-  margin-top: 12px;
   font-size: 15px;
   font-weight: 500;
-  color: #10b981;
+  color: hsl(var(--success));
 }
 
 .entry-explanation {
-  margin-top: 8px;
+  font-size: 13px;
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.4;
+}
+
+/* Related Forms */
+.related-forms {
+  text-align: center;
+  margin-top: 32px;
   font-size: 13px;
   color: hsl(var(--muted-foreground));
-  padding-top: 8px;
+  opacity: 0.7;
 }
 
-.general-explanation {
-  font-size: 14px;
-  padding: 16px;
-  background: hsl(240, 4%, 9%);
-  border: 1px solid hsl(var(--border));
-  border-radius: 8px;
-  color: hsl(var(--muted-foreground));
-  margin-bottom: 24px;
-}
-
-/* Highlights */
-.target-word {
-  color: hsl(var(--accent));
-  font-weight: 600;
-}
-
-.collocation {
+.related-forms .label {
   font-weight: 600;
   color: hsl(var(--primary));
-  text-decoration: underline decoration-thickness 2px;
-  text-underline-offset: 4px;
-  text-decoration-color: hsl(var(--accent));
+  margin-right: 4px;
 }
 
-/* Logic: Hide on Front */
-.front-card .translation,
-.front-card .entry-explanation,
+/* --- Logic: Hiding/Showing --- */
+
+.front-card .meta-section,
 .front-card .general-explanation,
 .front-card .related-forms {
   display: none !important;
 }
 
-/* The Cloze Blank */
+/* Cloze Blank Styling */
 .front-card .collocation {
   color: transparent !important;
-  font-size: 0 !important; /* Collapses the width of the hidden text */
+  font-size: 0 !important;
   background-color: hsl(var(--muted));
   text-decoration: none;
   border-radius: 4px;
@@ -243,13 +272,22 @@ Copy this into your Anki Note Type's **Styling** section.
 .front-card .collocation::after {
   content: "•••";
   color: hsl(var(--muted-foreground));
-  font-size: 12px; /* Restores size for the placeholder dots */
+  font-size: 12px;
   letter-spacing: 1px;
 }
 
-/* Anki TTS hidden tag styling */
-.anki-tts-label {
-  display: none;
+/* Highlighting */
+.target-word {
+  color: hsl(var(--accent));
+  font-weight: 600;
+}
+
+.collocation {
+  font-weight: 600;
+  color: hsl(var(--primary));
+  text-decoration: underline decoration-thickness 2px;
+  text-underline-offset: 4px;
+  text-decoration-color: hsl(var(--accent));
 }
 ```
 
