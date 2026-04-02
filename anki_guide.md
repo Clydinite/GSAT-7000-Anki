@@ -20,6 +20,29 @@
     {{Back}}
   </div>
 </div>
+
+<script>
+window.playTTS = function(text) {
+  // Stop any currently speaking text
+  window.speechSynthesis.cancel();
+  
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = 0.9; // Slightly slower for clarity
+  
+  // Find a high-quality English voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) 
+                      || voices.find(v => v.lang.startsWith('en'));
+  
+  if (preferredVoice) utterance.voice = preferredVoice;
+  
+  window.speechSynthesis.speak(utterance);
+};
+
+// Required for Chrome/Anki to load voices
+window.speechSynthesis.getVoices();
+</script>
 ```
 
 ### Back Template
@@ -37,62 +60,46 @@
 </div>
 
 <script>
-(function() {
-  // 1. Setup AnkiDroid JS API Contract
-  var jsApiContract = { version: "0.0.1", developer: "gsat-anki" };
-  var adApi = (typeof AnkiDroidJS !== 'undefined') ? new AnkiDroidJS(jsApiContract) : null;
+window.playTTS = function(text) {
+  // Stop any currently speaking text
+  window.speechSynthesis.cancel();
+  
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = 0.9; // Slightly slower for clarity
+  
+  // Find a high-quality English voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) 
+                      || voices.find(v => v.lang.startsWith('en'));
+  
+  if (preferredVoice) utterance.voice = preferredVoice;
+  
+  window.speechSynthesis.speak(utterance);
+};
 
-  window.playTTS = function(text) {
-    // Priority 1: AnkiDroid Native JS API
-    if (adApi && adApi.ankiTtsSpeak) {
-      adApi.ankiTtsSetLanguage("en_US");
-      adApi.ankiTtsSpeak(text, 0); // 0 = interrupt current speech
-      return;
-    }
-
-    // Priority 2: Web Speech API (Desktop/iOS)
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.9;
-      
-      const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) 
-                          || voices.find(v => v.lang.startsWith('en'));
-      if (preferredVoice) utterance.voice = preferredVoice;
-      
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
-  // Initialize voices for Chrome
-  if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
-    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-  }
-})();
+// Required for Chrome/Anki to load voices
+window.speechSynthesis.getVoices();
 </script>
 ```
 
 ---
 
-## 3. Styling (Shadcn Zinc + Buttons)
+## 3. Styling
 Copy this into your Anki Note Type's **Styling** section.
 
 ```css
-/* --- Shadcn Zinc Dark Theme --- */
-
 .card {
-  --background: 240 10% 3.9%;    /* Zinc 950 */
+  --background: 240 10% 3.9%;
   --card: 240 10% 3.9%;
   --card-foreground: 0 0% 98%;
   --popover: 240 10% 3.9%;
-  --primary: 0 0% 98%;           /* Zinc 50 */
-  --muted: 240 3.7% 15.9%;       /* Zinc 800ish */
-  --muted-foreground: 240 5% 64.9%; /* Zinc 400 */
-  --accent: 217.2 91.2% 59.8%;   /* Modern Blue */
+  --primary: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 217.2 91.2% 59.8%;
   --border: 240 3.7% 15.9%;
-  --success: 142.1 70.6% 45.3%;  /* Emerald 500 */
+  --success: 142.1 70.6% 45.3%;
   
   font-family: "Geist", "Inter", "Segoe UI", "PingFang TC", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
