@@ -1,9 +1,7 @@
-# Anki GSAT Card Setup Guide (Shadcn + TTS)
-
-This setup uses a Shadcn-inspired Zinc Dark theme with **Auto-TTS for the headword** and **Press-to-Play TTS for sentences**.
+# Anki GSAT Card Setup Guide
 
 ## 1. Create Note Type
-- Create a Note Type `GSAT-Shadcn-TTS` with fields: `Front` and `Back`.
+- Create a Note Type `GSAT` with fields: `Front` and `Back`.
 
 ---
 
@@ -15,6 +13,7 @@ This setup uses a Shadcn-inspired Zinc Dark theme with **Auto-TTS for the headwo
   <div class="header">
     <span class="badge">Vocabulary</span>
     <h1 class="headword">{{Front}}</h1>
+    <div style="display:none;">{{tts en_US:Front}}</div>
   </div>
   
   <div class="content-area">
@@ -38,30 +37,40 @@ This setup uses a Shadcn-inspired Zinc Dark theme with **Auto-TTS for the headwo
 </div>
 
 <script>
-// Logic for "Press-to-Play" sentences using Web Speech API
-window.playTTS = function(text) {
-  // Stop any currently speaking text
-  window.speechSynthesis.cancel();
-  
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'en-US';
-  utterance.rate = 0.9; // Slightly slower for clarity
-  
-  // Find a high-quality English voice if available
-  const voices = window.speechSynthesis.getVoices();
-  const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) 
-                      || voices.find(v => v.lang.startsWith('en'));
-  
-  if (preferredVoice) utterance.voice = preferredVoice;
-  
-  window.speechSynthesis.speak(utterance);
-};
+(function() {
+  // 1. Setup AnkiDroid JS API Contract
+  var jsApiContract = { version: "0.0.1", developer: "gsat-anki" };
+  var adApi = (typeof AnkiDroidJS !== 'undefined') ? new AnkiDroidJS(jsApiContract) : null;
 
-// Required for Chrome/Anki to load voices
-window.speechSynthesis.getVoices();
+  window.playTTS = function(text) {
+    // Priority 1: AnkiDroid Native JS API
+    if (adApi && adApi.ankiTtsSpeak) {
+      adApi.ankiTtsSetLanguage("en_US");
+      adApi.ankiTtsSpeak(text, 0); // 0 = interrupt current speech
+      return;
+    }
 
-// Auto-play the headword on flip
-window.playTTS('{{text:Front}}');
+    // Priority 2: Web Speech API (Desktop/iOS)
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.9;
+      
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) 
+                          || voices.find(v => v.lang.startsWith('en'));
+      if (preferredVoice) utterance.voice = preferredVoice;
+      
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  // Initialize voices for Chrome
+  if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }
+})();
 </script>
 ```
 
@@ -295,5 +304,5 @@ Copy this into your Anki Note Type's **Styling** section.
 
 ## 4. Import
 1. Run `python to_anki.py`.
-2. Import `anki_import.tsv` using the `GSAT-Shadcn-TTS` note type.
+2. Import `anki_import.tsv` using the `GSAT` note type.
 3. Ensure "Allow HTML" is checked.
