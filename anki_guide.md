@@ -109,16 +109,7 @@ Copy this into your Anki Note Type's **Styling** section.
   max-width: 600px;
   margin: 0 auto;
   padding: 32px 24px;
-}
-
-/* Mobile Padding Adjustment */
-@media (max-width: 480px) {
-  .card {
-    padding: 16px 12px;
-  }
-  .headword {
-    font-size: 32px !important;
-  }
+  border-radius: 12px;
 }
 
 /* Header & Typography */
@@ -269,41 +260,51 @@ Copy this into your Anki Note Type's **Styling** section.
   display: none !important;
 }
 
-/* Cloze Blank Styling */
-.front-card .collocation {
-  color: transparent !important;
-  font-size: 0 !important;
-  background-color: hsl(var(--muted));
-  text-decoration: none;
-  border-radius: 4px;
-  padding: 0 8px;
-  display: inline-flex;
-  min-width: 36px;
-  height: 1.2em;
-  vertical-align: middle;
-  align-items: center;
-  justify-content: center;
-}
-
-.front-card .collocation::after {
-  content: "•••";
-  color: hsl(var(--muted-foreground));
-  font-size: 12px;
-  letter-spacing: 1px;
-}
-
 /* Highlighting */
 .target-word {
   color: hsl(var(--accent));
   font-weight: 600;
+  background: hsla(217, 91%, 60%, 0.1);
+  padding: 0 2px;
+  border-radius: 2px;
 }
 
 .collocation {
   font-weight: 600;
   color: hsl(var(--primary));
-  text-decoration: underline decoration-thickness 2px;
-  text-underline-offset: 4px;
+  text-decoration: underline;
   text-decoration-color: hsl(var(--accent));
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  background: hsla(0, 0%, 100%, 0.05);
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* Mobile Padding Adjustment */
+@media (max-width: 480px) {
+  .card {
+    padding: 12px 8px;
+  }
+  .headword {
+    font-size: 32px;
+  }
+  .sentence {
+    font-size: 15px;
+  }
+  .entry {
+    padding: 12px;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .general-explanation {
+    padding: 12px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .header {
+    margin-bottom: 16px;
+  }
 }
 ```
 
