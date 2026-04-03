@@ -310,6 +310,6 @@ Copy this into your Anki Note Type's **Styling** section.
 ---
 
 ## 4. Import
-1. Run `python to_anki.py`.
+1. Run `python to_anki.py` (if not already built).
 2. Import `anki_import.tsv` using the `GSAT` note type.
 3. Ensure "Allow HTML" is checked.
