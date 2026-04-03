@@ -37,15 +37,15 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 # %%
 # Testing
 
-response = client.models.generate_content(
-    model="gemini-2.5-flash", contents="Explain how AI works in a few words"
-)
-print(response.text)
+# response = client.models.generate_content(
+#     model="gemini-2.5-flash", contents="Explain how AI works in a few words"
+# )
+# print(response.text)
 
 # %%
 example_response = {
   "headword": "account",
-  "explanation": "常考用法包括：(1) 名詞「帳戶」bank account；(2) 名詞「描述」eyewitness account；(3) 片語「將...考慮進去」take into account (固定用 into)；(4) 動詞片語「解釋/佔比例」account for。注意介係詞搭配。",
+  "explanation": "用法包括：(1) 名詞「帳戶」bank account；(2) 名詞「描述」eyewitness account；(3) 片語「將...考慮進去」take into account (固定用 into)；(4) 動詞片語「解釋/佔比例」account for。注意介係詞搭配。",
   "entries": [
     {
       "sentence": "The survivor provided a detailed <account> *of* the accident, helping the police understand what had happened on the highway.",
@@ -90,7 +90,7 @@ def generate_data(batch_words: list[str]) -> BatchWordResult:
     Rules:
 
     - headword: The base form of the word.
-    - explanation: High-value GSAT usage note (including common mistakes) in Traditional Chinese.
+    - explanation: High-value GSAT usage note (including common mistakes) in Traditional Chinese. There's no need to mention "GSAT" or other filler words in the explanation.
     - entries: List of example sentences with:
        - sentence:
             - Length: 15-25 words. 
@@ -128,10 +128,12 @@ def generate_data(batch_words: list[str]) -> BatchWordResult:
 
 origin = "data/vocabulary"
 
-# start from level 3
-level = 3
-word_list = []
+# Loading level from config
+with open("config.json", "r") as f:
+    config = json.load(f)
+    level = config.get("level", 3)
 
+word_list = []
 with open(f"{origin}/level{level}.txt", "r", encoding="utf-8") as f:
     word_list = [line.strip() for line in f.readlines()]
 
@@ -149,8 +151,8 @@ print(word_list[:5])
 words = word_list
 
 existing_words = set()
-if os.path.exists("raw_gsat_data.tsv"):
-    with open("raw_gsat_data.tsv", "r", encoding="utf-8") as f:
+if os.path.exists(f"data/raw/level{level}.tsv"):
+    with open(f"data/raw/level{level}.tsv", "r", encoding="utf-8") as f:
         reader = csv.reader(f, delimiter="\t")
         next(reader, None)  # Skip header
         for row in reader:
@@ -174,8 +176,8 @@ def is_quota_error(e):
 words = word_list
 
 existing_words = set()
-if os.path.exists("raw_gsat_data.tsv"):
-    with open("raw_gsat_data.tsv", "r", encoding="utf-8") as f:
+if os.path.exists(f"data/raw/level{level}.tsv"):
+    with open(f"data/raw/level{level}.tsv", "r", encoding="utf-8") as f:
         reader = csv.reader(f, delimiter="\t")
         next(reader, None)  # Skip header
         for row in reader:
@@ -188,10 +190,10 @@ print(existing_words)
 print(words_to_process[:5])
 print(f"Resuming: {len(existing_words)} already done. {len(words_to_process)} remaining.")
 
-with open("raw_gsat_data.tsv", "a", encoding="utf-8", newline="") as f:
+with open(f"data/raw/level{level}.tsv", "a", encoding="utf-8", newline="") as f:
     writer = csv.writer(f, delimiter="\t")
     
-    if os.path.getsize("raw_gsat_data.tsv") == 0:
+    if os.path.getsize(f"data/raw/level{level}.tsv") == 0:
         writer.writerow(["headword", "raw_string", "response"])
 
     chunk_size = 10
@@ -244,3 +246,5 @@ with open("raw_gsat_data.tsv", "a", encoding="utf-8", newline="") as f:
                     break
 
 
+
+# %%
