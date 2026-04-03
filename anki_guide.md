@@ -309,7 +309,17 @@ Copy this into your Anki Note Type's **Styling** section.
 
 ---
 
-## 4. Import
-1. Run `python to_anki.py` (if not already built).
-2. Import `anki_import.tsv` using the `GSAT` note type.
-3. Ensure "Allow HTML" is checked.
+## 4. Import & Deck Organization
+
+The vocabulary is organized by levels. You can choose to import everything into one deck or create a separate deck for each level.
+
+### Importing to Separate Decks
+1. In Anki, go to **Import**.
+2. Select the level file (e.g., `data/Anki/level3_import.tsv`).
+3. In the Import dialog:
+   - **Type:** Select the `GSAT` Note Type you created in Step 1.
+   - **Deck:** Click the deck name and type a new name like `GSAT::Level 4` to create a sub-deck.
+   - **Options:** Ensure "Allow HTML in fields" is checked.
+4. Repeat for each level you wish to add.
+
+*Tip: Using the `::` syntax (e.g., `GSAT::Level 1`) allows you to keep all levels organized under a single parent "GSAT" deck.*
