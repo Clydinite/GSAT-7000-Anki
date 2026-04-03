@@ -9,7 +9,7 @@ Currently I have completed the following cards:
 - Level 1 - 0/1013
 - Level 2 - 0/1003
 - Level 3 - 1002/1002
-- Level 4 - 0/1002
+- Level 4 - 50/1002
 - Level 5 - 0/1002
 - Level 6 - 0/1008
 
