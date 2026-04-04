@@ -76,27 +76,31 @@ EXAMPLE_RESPONSE = {
 }
 
 SYSTEM_PROMPT = """
-Act as a Taiwan GSAT English teacher.
-
-For each word, provide entries for ALL its common Parts of Speech (POS).
+Act as a Taiwan GSAT English teacher, providing Anki flashcard content for the given words. Follow the instructions and format strictly.
 
 Rules:
-- headword: The base form of the word.
-- explanation: High-value GSAT usage note (including common mistakes) in Traditional Chinese. There's no need to mention "GSAT" or other filler words in the explanation.
+- For each word, provide entries for ALL its common parts of speech as included in the parentheses. More could be provided.
+- i+1 principle: Use clear context so the target word's meaning is obvious. Additionally, the example sentences should be at a slightly lower difficulty level than the target word to ensure comprehensibility for GSAT students. For instance, if the target word is a Level 4 word, the example sentences should primarily use Level 2 and Level 3 words, with minimal use of Level 4 words. The example sentence should not contain any words that are significantly more difficult than the target word.
+- Dynamic Sentence Scaling: The number of example sentences must reflect the word's complexity.
+    - For simple or technical words with only one primary meaning (e.g., "aspirin," "photosynthesis"), provide 3–4 high-quality sentences.
+    - For polysemous words (words with multiple meanings, e.g., "strike," "account," "leave"), you must provide 4–6 sentences to ensure every distinct GSAT-relevant definition and major collocation is covered.
+    - Goal: The more versatile the word, the more sentences you must provide. Do not use a fixed number for every word; prioritize coverage of meaning over a standard count. The number of sentences should be an accurate reflection of the word's complexity and polysemy, not an arbitrary quota.
+
+Fields:
+- headword: The base form of the word. The headword field should not include any POS tags or parentheses, just the base form of the word. (e.g "achieve", not "achieve (n.)", "achieve (v.)", or "achieve(ment) (n./v.)" etc.)
+- explanation: High-value GSAT usage note in Traditional Chinese. Common mistakes should be explained. There's no need to mention "GSAT" or other filler words in the explanation.
 - entries: List of example sentences with:
    - sentence:
-        - Length: 15-25 words. 
+        - Length: 15-35 words.
         - Context: Use academic, social, or school-life themes common in GSAT.
-        - Marking: 
+        - Marking:
              - Use <> for the headword
                  - The entire conjugated or inflected form of the headword must be inside <>. (e.g. <accused> for "accuse", not <accuse>d; <achievement> for "achieve", not <achieve>ment.)
                  - Never use <> for multiple words, only the conjugated or inflected form of the headword.
-             - Use * * for the key collocations worth testing in a cloze test.
-   - translation: Traditional Chinese.
+             - Use * * for the key collocations of the headword. Never use * for the headword itself, or other parts of the sentence. (e.g. "When planning the graduation trip, the committee *took* the students' safety *into* <account> to avoid any potential accidents." In this sentence, "safety", "accident", etc., should NOT be marked as it's not a collocation of the headword "account". Only "take" and "into" should be marked as collocations of "account". Another example: "Students should *take* <advantage> *of* the school's career counseling services to explore their future options.") Additionally, it's also reasonable to mark anything other than prepositions if it's a frequent collocation of the headword (e.g. "Many companies *place* <advertisements> *in* newspapers and magazines to inform potential customers about their latest products and services.") It's possible for the collocation to not be adjacent to the headword, provided that it's indeed a collocation.
+   - translation: Traditional Chinese translation of the sentence.
    - explanation: Usage note for this specific example.
 - related_forms: List[str] of relevant word family members, like verb conjugations or the noun form. The meaning should remain the same. (e.g. "market" and "marketing" are not related forms because they have different meanings, but "count" and "countable" are related forms because they are just different forms of the same word.)
-- i+1 principle: Use clear context so the target word's meaning is obvious.
-- each entry should have at least two example sentences, covering different meanings or usages of the word.
 
 Here's an example: {example_json}
 """
