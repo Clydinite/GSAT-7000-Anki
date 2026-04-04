@@ -9,6 +9,7 @@ import re
 from typing import List, Literal, Optional
 from google import genai
 from google.api_core import exceptions
+from google.genai import types
 from dotenv import load_dotenv
 from utils import BatchWordResult, append_to_raw_tsv, SYSTEM_PROMPT, EXAMPLE_RESPONSE
 
@@ -19,6 +20,11 @@ if not API_KEY:
     raise ValueError("Please set the GEMINI_API_KEY environment variable.")
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+# %%
+# Information
+
+print(f"System prompt:\n{SYSTEM_PROMPT}")
 
 # %%
 # Configuration
@@ -42,11 +48,13 @@ def generate_data(batch_words: list[str]) -> BatchWordResult:
     response = client.models.generate_content(
         model="gemini-3.1-flash-lite-preview",
         contents=full_prompt,
-        config={
-            "response_mime_type": "application/json",
-            "response_schema": BatchWordResult,
-            "temperature": 0.3, # Low temperature for more deterministic output
-        }
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=BatchWordResult,
+            temperature=0.8,
+            # Correct nesting for thinking levels
+            thinking_config=types.ThinkingConfig(thinking_level="low")
+        ),
     )
     
     return response.parsed
@@ -122,3 +130,5 @@ for start_idx in range(0, len(words_to_process), chunk_size):
                 
                 # break out of the "while" loop on permanent error (to avoid infinite loop)
                 break
+
+# %%
