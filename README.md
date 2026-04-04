@@ -9,11 +9,13 @@ Currently I have completed the following cards:
 - Level 1 - 0/1013
 - Level 2 - 0/1003
 - Level 3 - 1002/1002
-- Level 4 - 50/1002
+- Level 4 - 1002/1002
 - Level 5 - 0/1002
 - Level 6 - 0/1008
 
 The remaining levels are yet to be generated. You can help by generating cards for any level (probably level 5 would be the best since I'm working on level 4 already). Simply change the `level` in `config.json` and run the scripts. However, a Gemini API key is required (change the `.env.example` to `.env` and fill in the API key), which can be obtained for free on [Google AI Studio](https://aistudio.google.com/api-keys).
+
+There's a huge amount of cards with errors in `* ... *` markings. I'm working on cleaning them up.
 
 ## Project Structure
 
