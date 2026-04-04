@@ -287,7 +287,7 @@ Copy this into your Anki Note Type's **Styling** section.
     padding: 12px 8px;
   }
   .headword {
-    font-size: 32px;
+    font-size: 40px;
   }
   .sentence {
     font-size: 15px;
