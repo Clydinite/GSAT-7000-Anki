@@ -6,15 +6,20 @@ import html
 
 def format_sentence(sentence):
     """Adds styling spans to the sentence markers."""
-    # Replace <word> with <span class="target-word">word</span>
-    sentence = re.sub(r'<(.*?)>', r'<span class="target-word">\1</span>', sentence)
-    # Replace *collocation* with <span class="collocation">collocation</span>
-    sentence = re.sub(r'\*(.*?)\*', r'<span class="collocation">\1</span>', sentence)
+    # Replace <target>word</target> with <span class="target-word">word</span>
+    sentence = re.sub(r'<target>(.*?)</target>', r'<span class="target-word">\1</span>', sentence)
+    # Replace <pattern>collocation</pattern> with <span class="collocation">collocation</span>
+    sentence = re.sub(r'<pattern>(.*?)</pattern>', r'<span class="collocation">\1</span>', sentence)
     return sentence
 
 def clean_for_tts(sentence):
     """Removes marker characters for clean speech synthesis."""
-    return sentence.replace("<", "").replace(">", "").replace("*", "").strip()
+    # Remove all XML-style tags
+    return re.sub(r'<[^>]*>', '', sentence).strip()
+
+def strip_tags(text):
+    """Removes XML-style tags for clean display in non-sentence fields."""
+    return re.sub(r'<[^>]*>', '', text).strip()
 
 def generate_html(data):
     html_parts = []
@@ -22,7 +27,7 @@ def generate_html(data):
 
     # General Explanation
     if data.get("explanation"):
-        html_parts.append(f'<div class="general-explanation">{html.escape(data["explanation"])}</div>')
+        html_parts.append(f'<div class="general-explanation">{html.escape(strip_tags(data["explanation"]))}</div>')
 
     # Entries
     html_parts.append('<div class="entries-container">')
@@ -43,9 +48,9 @@ def generate_html(data):
         if entry.get("translation") or entry.get("explanation"):
             html_parts.append('<div class="meta-section">')
             if entry.get("translation"):
-                html_parts.append(f'<div class="translation">{html.escape(entry["translation"])}</div>')
+                html_parts.append(f'<div class="translation">{html.escape(strip_tags(entry["translation"]))}</div>')
             if entry.get("explanation"):
-                html_parts.append(f'<div class="entry-explanation">{html.escape(entry["explanation"])}</div>')
+                html_parts.append(f'<div class="entry-explanation">{html.escape(strip_tags(entry["explanation"]))}</div>')
             html_parts.append('</div>')
         html_parts.append('</div>')
     html_parts.append('</div>')
