@@ -1,84 +1,15 @@
 import csv
 import json
 import os
-import sqlite3
-from datetime import datetime
 from typing import List, Optional, Literal
 from pydantic import BaseModel
 
 # --- State Management ---
 VerificationState = Literal["none", "ai_pass", "ai_fail", "human"]
 
-VIOLATION_TYPES = {
-    "COLLOCATION_ERROR": "The collocation pattern is not related to the headword.",
-    "TAG_ERROR": "Missing, unbalanced or nesting of <target> or <pattern> tags.",
-    "FORMAT_ERROR": "JSON structure, length, or POS requirements violated.",
-    "STYLE_MISMATCH": "The style does not fit the given human verified examples.",
-    "ENTRY_COUNT_ERROR": "Number of entries doesn't match word complexity.",
-    "TAG_SCOPE_ERROR": "Tagged generic nouns or articles (the, all) instead of collocations.",
-    "INCOMPLETE_PATTERN": "Missing key prepositions/particles (e.g. tagging 'goal' instead of 'achieve... goal').",
-    "LANGUAGE_ERROR": "Simplified Chinese, English in translation, or non-Taiwan terminology.",
-    "LOGIC_ERROR": "Explanation contradicts actual usage in the sentence.",
-    "OTHER": "Other issues, specified in the comment."
-}
-
-def get_random_human_examples(level: int, count: int = 10) -> List[dict]:
-    """Fetches random human-verified examples to use as a few-shot seed."""
-    file_path = f"data/raw/level{level}.tsv"
-    if not os.path.exists(file_path):
-        return []
-    
-    examples = []
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f, delimiter="\t")
-            human_rows = [row for row in reader if row.get("verification") == "human"]
-            
-            if not human_rows:
-                return []
-                
-            import random
-            selected = random.sample(human_rows, min(len(human_rows), count))
-            for row in selected:
-                try:
-                    examples.append({
-                        "headword": row["headword"],
-                        "response": json.loads(row["response"])
-                    })
-                except:
-                    continue
-    except Exception as e:
-        print(f"Error sampling examples: {e}")
-    return examples
-
-def log_event(level: int, headword: str, agent: str, old_state: str, new_state: str, response: str, violations: List[str] = []):
-    """Writes an immutable entry to the SQLite audit log."""
-    db_path = "logs.db"
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp TEXT,
-            level INTEGER,
-            headword TEXT,
-            agent TEXT,
-            old_state TEXT,
-            new_state TEXT,
-            response TEXT,
-            violations TEXT
-        )
-    ''')
-    cursor.execute('''
-        INSERT INTO history (timestamp, level, headword, agent, old_state, new_state, response, violations)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (datetime.now().isoformat(), level, headword, agent, old_state, new_state, response, json.dumps(violations or [])))
-    conn.commit()
-    conn.close()
-
 class Example(BaseModel):
     sentence: str               # e.g., "He <target>accused</target> him <pattern>of</pattern> theft."
-    translation: str            # Traditional Chinese Chinese translation
+    translation: str            # Traditional Chinese translation
     explanation: Optional[str]  # Explanation of example sentence.
 
 class WordResult(BaseModel):
@@ -92,37 +23,42 @@ class BatchWordResult(BaseModel):
 
 class VerificationResult(BaseModel):
     status: Literal["pass", "fail"]
-    violations: List[str]  # Codes from VIOLATION_TYPES
-    comment: str
+    comment: str  # Natural language description of the problem
 
-def append_to_raw_tsv(level: int, words: List[str], batch_results: BatchWordResult, verification: VerificationState = "none", violations: List[str] = [], attempts: int = 0):
-    """Appends results to the level-specific raw TSV file with state and metadata."""
-    output_file = f"data/raw/level{level}.tsv"
+class BatchVerificationResult(BaseModel):
+    results: List[VerificationResult]
+
+def get_random_human_examples(level: int, count: int = 10) -> List[dict]:
+    """Fetches random human-verified examples to use as a few-shot seed."""
+    file_path: str = f"data/raw/level{level}.tsv"
+    if not os.path.exists(file_path): return []
+    examples: List[dict] = []
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f, delimiter="\t")
+            human_rows: List[dict] = [row for row in reader if row.get("verification") == "human"]
+            if not human_rows: return []
+            import random
+            selected: List[dict] = random.sample(human_rows, min(len(human_rows), count))
+            for row in selected:
+                try:
+                    examples.append({"headword": row["headword"], "response": json.loads(row["response"])})
+                except: continue
+    except: return []
+    return examples
+
+def append_to_raw_tsv(level: int, words: List[str], batch_results: BatchWordResult, verification: VerificationState = "none", comment: str = "", attempts: int = 0) -> None:
+    output_file: str = f"data/raw/level{level}.tsv"
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
-    
-    file_exists = os.path.exists(output_file) and os.path.getsize(output_file) > 0
-    
+    file_exists: bool = os.path.exists(output_file) and os.path.getsize(output_file) > 0
     with open(output_file, "a", encoding="utf-8", newline="") as f:
         writer = csv.writer(f, delimiter="\t")
-        
         if not file_exists:
-            writer.writerow(["headword", "raw_string", "response", "verification", "violations", "attempts"])
-
+            writer.writerow(["headword", "raw_string", "response", "verification", "comment", "attempts"])
         for idx, r in enumerate(batch_results.results):
-            raw_string = words[idx] if idx < len(words) else r.headword
-            # Log the initial state or current transition
-            log_event(level, r.headword, "writer", "unknown", verification, r.model_dump_json(), violations)
-            
-            writer.writerow([
-                r.headword,
-                raw_string,
-                r.model_dump_json(),
-                verification,
-                json.dumps(violations or []),
-                attempts
-            ])
+            raw_string: str = words[idx] if idx < len(words) else r.headword
+            writer.writerow([r.headword, raw_string, r.model_dump_json(), verification, comment, attempts])
         f.flush()
-    print(f"Appended {len(batch_results.results)} words to {output_file} (State: {verification}).")
 
 EXAMPLE_RESPONSE = {
   "headword": "account",
