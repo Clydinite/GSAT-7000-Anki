@@ -31,11 +31,7 @@ print(f"System prompt:\n{SYSTEM_PROMPT}")
 
 origin = "data/vocabulary"
 
-# Loading level from config
-with open("config.json", "r") as f:
-    config = json.load(f)
-    level = config.get("level", 3)
-
+level = 3
 output_file = f"data/raw/level{level}.tsv"
 
 # %%

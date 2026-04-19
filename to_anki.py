@@ -84,9 +84,7 @@ def convert_to_anki(input_file, output_file):
         print(f"Successfully converted {count} words to {output_file}")
 
 if __name__ == "__main__":
-    with open("config.json", "r") as f:
-        config = json.load(f)
-        level = config["level"]
+    level = 3
     
     os.makedirs("data/Anki", exist_ok=True)
     convert_to_anki(f"data/raw/level{level}.tsv", f"data/Anki/level{level}_import.tsv")
