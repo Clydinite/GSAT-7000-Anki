@@ -28,23 +28,26 @@ class VerificationResult(BaseModel):
 class BatchVerificationResult(BaseModel):
     results: List[VerificationResult]
 
-def get_random_human_examples(level: int, count: int = 10) -> List[dict]:
+def get_random_human_examples(count: int = 10) -> List[dict]:
     """Fetches random human-verified examples to use as a few-shot seed."""
-    file_path: str = f"data/raw/level{level}.tsv"
-    if not os.path.exists(file_path): return []
     examples: List[dict] = []
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f, delimiter="\t")
-            human_rows: List[dict] = [row for row in reader if row.get("verification") == "human"]
-            if not human_rows: return []
-            import random
-            selected: List[dict] = random.sample(human_rows, min(len(human_rows), count))
-            for row in selected:
-                try:
-                    examples.append({"headword": row["headword"], "response": json.loads(row["response"])})
-                except: continue
-    except: return []
+    all_human_rows: List[dict] = []
+    for level in range(1, 7):
+        file_path: str = f"data/raw/level{level}.tsv"
+        if not os.path.exists(file_path): continue
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f, delimiter="\t")
+                human_rows: List[dict] = [row for row in reader if row.get("verification") == "human"]
+                all_human_rows.extend(human_rows)
+        except: continue
+    if not all_human_rows: return []
+    import random
+    selected: List[dict] = random.sample(all_human_rows, min(len(all_human_rows), count))
+    for row in selected:
+        try:
+            examples.append({"headword": row["headword"], "response": json.loads(row["response"])})
+        except: continue
     return examples
 
 def append_to_raw_tsv(level: int, words: List[str], batch_results: BatchWordResult, verification: VerificationState = "none", comment: str = "", attempts: int = 0) -> None:
