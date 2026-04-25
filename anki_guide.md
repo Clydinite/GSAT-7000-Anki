@@ -15,10 +15,6 @@
     <h1 class="headword">{{Front}}</h1>
     <div style="display:none;">{{tts en_US:Front}}</div>
   </div>
-  
-  <div class="content-area">
-    {{Back}}
-  </div>
 </div>
 
 <script>
@@ -42,6 +38,14 @@ window.playTTS = function(text) {
 
 // Required for Chrome/Anki to load voices
 window.speechSynthesis.getVoices();
+
+// Reveal back side on 3 second delay (only works on desktop)
+function flipToBack() {
+  if (typeof pycmd !== "undefined") {
+      pycmd("ans"); // Desktop
+  }
+}
+setTimeout(flipToBack, 3000);
 </script>
 ```
 
@@ -60,6 +64,35 @@ window.speechSynthesis.getVoices();
 </div>
 
 <script>
+// Accordion Reveal Logic
+(function() {
+  const metaSections = document.querySelectorAll('.meta-section');
+  
+  metaSections.forEach((section) => {
+    // 1. Create Accordion Trigger (The Button)
+    const trigger = document.createElement('button');
+    trigger.className = 'accordion-trigger';
+    trigger.innerHTML = `
+      <span>Reveal</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    `;
+    
+    // 2. Setup Section as Content Area
+    section.classList.add('accordion-content');
+    
+    trigger.onclick = (e) => {
+      e.preventDefault();
+      const isExpanded = trigger.classList.toggle('active');
+      section.classList.toggle('expanded');
+      
+      // Auto-hide trigger text if you want it to disappear after one use
+      // trigger.style.display = 'none'; 
+    };
+    
+    section.parentNode.insertBefore(trigger, section);
+  });
+})();
+
 window.playTTS = function(text) {
   // Stop any currently speaking text
   window.speechSynthesis.cancel();
@@ -112,7 +145,61 @@ Copy this into your Anki Note Type's **Styling** section.
   border-radius: 12px;
 }
 
-/* Header & Typography */
+/* --- Accordion Components --- */
+
+.accordion-trigger {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  height: 40px;
+  line-height: 1;
+  background: transparent;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  color: hsl(var(--muted-foreground));
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-family: inherit;
+}
+
+.accordion-trigger:hover {
+  background: transparent;
+  border: 1px solid hsl(var(--border));
+}
+
+.accordion-trigger .chevron {
+  width: 16px;
+  height: 16px;
+  margin: 0 4px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-trigger.active .chevron {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-content.expanded {
+  opacity: 1;
+  max-height: 1000px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* --- Layout Components --- */
+
 .header {
   text-align: center;
   margin-bottom: 24px;
@@ -149,7 +236,7 @@ Copy this into your Anki Note Type's **Styling** section.
 .general-explanation {
   font-size: 14px;
   padding: 16px;
-  background: hsl(240, 4%, 9%); /* Zinc 900ish */
+  background: hsl(240, 4%, 9%);
   border: 1px solid hsl(var(--border));
   border-radius: 8px;
   color: hsl(var(--muted-foreground));
@@ -167,6 +254,7 @@ Copy this into your Anki Note Type's **Styling** section.
   border: 1px solid hsl(var(--border));
   border-radius: 12px;
   margin-bottom: 16px;
+  text-align: left;
 }
 
 /* Sentence Area */
@@ -219,9 +307,6 @@ Copy this into your Anki Note Type's **Styling** section.
   padding-left: 12px;
   border-left: 2px solid hsl(var(--success));
   background: hsla(142, 70%, 45%, 0.03);
-  margin-top: 4px;
-  padding-top: 4px;
-  padding-bottom: 4px;
 }
 
 .translation {
@@ -252,15 +337,7 @@ Copy this into your Anki Note Type's **Styling** section.
   margin-right: 4px;
 }
 
-/* --- Logic: Hiding/Showing --- */
-
-.front-card .meta-section,
-.front-card .general-explanation,
-.front-card .related-forms {
-  display: none !important;
-}
-
-/* Highlighting */
+/* --- Highlighting --- */
 .target-word {
   color: hsl(var(--accent));
   font-weight: 600;
@@ -281,7 +358,7 @@ Copy this into your Anki Note Type's **Styling** section.
   border-radius: 2px;
 }
 
-/* Mobile Padding Adjustment */
+/* Mobile Adjustments */
 @media (max-width: 480px) {
   .card {
     padding: 12px 8px;
