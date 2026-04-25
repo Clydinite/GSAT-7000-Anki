@@ -1,6 +1,8 @@
 # GSAT English Vocabulary
 
-This repository contains a collection of vocabulary for GSAT listed in `data/` directory, along with the cards for Anki. The cards are currently under development. I would appreciate support on additional card generations or corrections.
+This repository contains a collection of vocabulary for GSAT listed in `data/` directory, along with generated TSV for Anki. Templates and stylings are also provided.
+
+The cards are currently under development. I would appreciate support on additional card generations or corrections.
 
 ## Card Status
 
@@ -13,16 +15,17 @@ Currently I have completed the following cards:
 - Level 5 - 0/1002
 - Level 6 - 0/1008
 
-The remaining levels are yet to be generated. You can help by generating cards for any level (probably level 5 would be the best since I'm working on level 4 already). Simply change the `level` in `config.json` and run the scripts. However, a Gemini API key is required (change the `.env.example` to `.env` and fill in the API key), which can be obtained for free on [Google AI Studio](https://aistudio.google.com/api-keys).
+The remaining levels are yet to be generated. You can help by generating cards for any level (probably level 5 would be the best). Simply change the `level` variable in the script. However, a Gemini API key is required (change the `.env.example` to `.env` and fill in the API key), which can be obtained for free on [Google AI Studio](https://aistudio.google.com/api-keys).
 
-There's a huge amount of cards with errors in `* ... *` markings. I'm working on cleaning them up.
+All sentences are marked with `<pattern> ... </pattern>` and `<target> ... </target>` tags. The target words are marked with `<target> ... </target>` tags, while the collocation words are marked with `<pattern> ... </pattern>` tags.
+
+There's currently a high amount of cards with errors in `<pattern> ... </pattern>` markings. I'm working on cleaning them up.
 
 ## Project Structure
 
 - `data/vocabulary/`: Source word lists for each level.
-- `data/raw/`: Raw Gemini API responses in TSV format (level-specific), it includes `<` `>` and `*` markers.
-- `data/Anki/`: Formatted TSV files ready for Anki import.
-- `config.json`: Central configuration to set the current processing level.
+- `data/raw/`: Raw Gemini API responses in TSV format (level-specific), it includes `<pattern>` and `<target>` markers.
+- `data/Anki/`: Formatted TSV files ready for Anki import. (generated via `to_anki.py`)
 
 ## How to Contribute
 
@@ -30,10 +33,10 @@ The remaining levels are yet to be generated. You can help by generating cards f
 
 1.  **Setup:** Clone the repo and install dependencies.
 2.  **API Key:** Change `.env.example` to `.env` and fill in your Gemini API key from [Google AI Studio](https://aistudio.google.com/api-keys).
-3.  **Configure:** Update `config.json` with the level you want to generate (e.g., `"level": 5`).
-4.  **Process:** Run `python process.py` to fetch data from the API.
+3.  **Configure:** Update the `level` variable in `process.py` and `to_anki.py` to the level you want to generate (e.g., `level = 5`).
+4.  **Process:** Run `python process.py` to generate the raw TSV files in `data/raw/` via the Gemini API.
 5.  **Export:** Run `python to_anki.py` to generate the Anki import file in `data/Anki/`.
-6.  **Submit:** Create a Pull Request with the new files in `data/raw/` and `data/Anki/`.
+6.  **Submit:** Create a Pull Request on GitHub with the new files in `data/raw/` and `data/Anki/`.
 
 ## Data Source
 
