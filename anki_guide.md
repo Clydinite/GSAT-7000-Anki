@@ -38,14 +38,6 @@ window.playTTS = function(text) {
 
 // Required for Chrome/Anki to load voices
 window.speechSynthesis.getVoices();
-
-// Reveal back side on 3 second delay (only works on desktop)
-function flipToBack() {
-  if (typeof pycmd !== "undefined") {
-      pycmd("ans"); // Desktop
-  }
-}
-setTimeout(flipToBack, 3000);
 </script>
 ```
 
@@ -55,6 +47,7 @@ setTimeout(flipToBack, 3000);
   <div class="header">
     <span class="badge">Vocabulary</span>
     <h1 class="headword">{{Front}}</h1>
+    <div style="display:none;">{{tts en_US:Front}}</div>
   </div>
   <hr class="separator">
   
@@ -64,31 +57,38 @@ setTimeout(flipToBack, 3000);
 </div>
 
 <script>
-// Accordion Reveal Logic
 (function() {
+  // 1. General Explanation: Blur-to-Reveal Logic
+  const general = document.querySelector('.general-explanation');
+  if (general) {
+    general.classList.add('blur-reveal-container');
+    const overlay = document.createElement('div');
+    overlay.className = 'blur-overlay';
+    
+    overlay.onclick = () => {
+      general.classList.add('revealed');
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.remove(), 400);
+    };
+    general.appendChild(overlay);
+  }
+
+  // 2. Entries: Accordion Reveal Logic
   const metaSections = document.querySelectorAll('.meta-section');
-  
   metaSections.forEach((section) => {
-    // 1. Create Accordion Trigger (The Button)
     const trigger = document.createElement('button');
     trigger.className = 'accordion-trigger';
     trigger.innerHTML = `
-      <span>Reveal</span>
+      <span>Reveal Translation & Notes</span>
       <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
     `;
     
-    // 2. Setup Section as Content Area
     section.classList.add('accordion-content');
-    
     trigger.onclick = (e) => {
       e.preventDefault();
-      const isExpanded = trigger.classList.toggle('active');
+      trigger.classList.toggle('active');
       section.classList.toggle('expanded');
-      
-      // Auto-hide trigger text if you want it to disappear after one use
-      // trigger.style.display = 'none'; 
     };
-    
     section.parentNode.insertBefore(trigger, section);
   });
 })();
@@ -145,8 +145,40 @@ Copy this into your Anki Note Type's **Styling** section.
   border-radius: 12px;
 }
 
-/* --- Accordion Components --- */
+/* --- General Explanation: Blur Logic --- */
+.general-explanation {
+  position: relative;
+  font-size: 14px;
+  padding: 16px;
+  background: hsl(240, 4%, 9%);
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 24px;
+  line-height: 1.6;
+  filter: blur(5px);
+  transition: filter 0.5s ease;
+  user-select: none;
+}
 
+.general-explanation.revealed {
+  filter: blur(0);
+  user-select: text;
+}
+
+.blur-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: opacity 0.4s ease;
+  z-index: 10;
+}
+
+/* --- Entries: Accordion UI --- */
 .accordion-trigger {
   box-sizing: border-box;
   width: 100%;
@@ -164,7 +196,7 @@ Copy this into your Anki Note Type's **Styling** section.
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
   font-family: inherit;
 }
 
@@ -193,7 +225,7 @@ Copy this into your Anki Note Type's **Styling** section.
 
 .accordion-content.expanded {
   opacity: 1;
-  max-height: 1000px;
+  max-height: 2000px;
   padding-top: 12px;
   padding-bottom: 12px;
 }
@@ -232,17 +264,6 @@ Copy this into your Anki Note Type's **Styling** section.
   margin: 24px 0;
 }
 
-/* General Usage Note */
-.general-explanation {
-  font-size: 14px;
-  padding: 16px;
-  background: hsl(240, 4%, 9%);
-  border: 1px solid hsl(var(--border));
-  border-radius: 8px;
-  color: hsl(var(--muted-foreground));
-  margin-bottom: 24px;
-  line-height: 1.6;
-}
 
 /* Entry Container */
 .entry {
