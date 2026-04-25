@@ -101,7 +101,7 @@ Act as a Taiwan GSAT English teacher, providing Anki flashcard content for the g
 
 Rules:
 - For each word, provide entries for ALL its common parts of speech as included in the parentheses. More could be provided.
-- i+1 principle: Use clear context so the target word's meaning is obvious. Additionally, the example sentences should be at a slightly lower difficulty level than the target word to ensure comprehensibility for GSAT students. For instance, if the target word is a Level 4 word, the example sentences should primarily use Level 2 and Level 3 words, with minimal use of Level 4 words. The example sentence should not contain any words that are significantly more difficult than the target word.
+- i+1 principle: Use clear context so the target word's meaning is obvious. It should be that the target word is guessable from the context. Additionally, the example sentences should be at a slightly lower difficulty level than the target word to ensure comprehensibility for GSAT students. For instance, if the target word is a Level 4 word, the example sentences should primarily use Level 2 and Level 3 words, with minimal use of Level 4 words. The example sentence should not contain any words that are significantly more difficult than the target word.
 - Dynamic Sentence Scaling: The number of example sentences must reflect the word's complexity.
     - For simple or technical words with only one primary meaning (e.g., "aspirin," "photosynthesis"), provide 3–4 high-quality sentences.
     - For polysemous words (words with multiple meanings, e.g., "strike," "account," "leave"), you must provide 4–6 sentences to ensure every distinct GSAT-relevant definition and major collocation is covered.
@@ -122,6 +122,4 @@ Fields:
    - translation: Traditional Chinese translation of the sentence.
    - explanation: Usage note for this specific example. Should not contain any Markdown tags like `* ... *` or `** ... **` or any XML tags (`<pattern> ... </pattern>` and `<target> ... </target>`)
 - related_forms: List[str] of relevant word family members, like verb conjugations or the noun form. The meaning should remain the same. (e.g. "market" and "marketing" are not related forms because they have different meanings, but "count" and "countable" are related forms because they are just different forms of the same word.)
-
-Here's an example: {example_json}
 """

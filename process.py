@@ -6,12 +6,12 @@ import time
 import os
 import csv
 import re
-from typing import List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 from google import genai
 from google.api_core import exceptions
 from google.genai import types
 from dotenv import load_dotenv
-from utils import BatchWordResult, append_to_raw_tsv, SYSTEM_PROMPT, EXAMPLE_RESPONSE
+from utils import BatchWordResult, append_to_raw_tsv, SYSTEM_PROMPT, EXAMPLE_RESPONSE, get_random_human_examples
 
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
@@ -31,29 +31,31 @@ print(f"System prompt:\n{SYSTEM_PROMPT}")
 
 origin = "data/vocabulary"
 
-level = 3
+level = 4
 output_file = f"data/raw/level{level}.tsv"
 
 # %%
-def generate_data(batch_words: list[str]) -> BatchWordResult:
-    # Use SYSTEM_PROMPT from utils.py
-    full_prompt = SYSTEM_PROMPT.format(example_json=json.dumps(EXAMPLE_RESPONSE, ensure_ascii=False))
-    full_prompt += f"\n\nHere are the words: {batch_words}"
+def generate_batch(batch_items: list[str], human_examples: List[Dict[str, Any]]) -> BatchWordResult:
+    few_shot = "### GOLD STANDARD EXAMPLES:\n"
+    for ex in human_examples:
+        few_shot += f"Word: {ex['headword']}\nJSON: {json.dumps(ex['response'], ensure_ascii=False)}\n---\n"
     
-    # Using the latest 2026 SDK 'generate' method
+    batch_prompt = SYSTEM_PROMPT
+    batch_prompt += few_shot
+    batch_prompt += f"\n\n ### BATCH TO GENERATE {batch_items}"
+    
     response = client.models.generate_content(
-        model="gemini-3.1-flash-lite-preview",
-        contents=full_prompt,
+        model="gemma-4-31b-it",
+        contents=batch_prompt,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=BatchWordResult,
             temperature=0.8,
-            # Correct nesting for thinking levels
-            thinking_config=types.ThinkingConfig(thinking_level="low")
+            thinking_config=types.ThinkingConfig(thinking_level="high") # type: ignore
         ),
     )
     
-    return response.parsed
+    return response.parsed # type: ignore
 
 # %%
 # Loading word list
@@ -82,11 +84,6 @@ words_to_process = [w for w in word_list if w not in existing_words]
 print(f"Resuming Level {level}: {len(existing_words)} already done. {len(words_to_process)} remaining.")
 
 # %%
-def is_quota_error(e):
-    err_str = str(e).lower()
-    return "429" in err_str or "resource_exhausted" in err_str
-
-# %%
 # Processing loop
 
 chunk_size = 10
@@ -94,37 +91,34 @@ total_chunks = (len(words_to_process) + chunk_size - 1) // chunk_size
 
 for start_idx in range(0, len(words_to_process), chunk_size):
     chunk = words_to_process[start_idx : start_idx + chunk_size]
-    print(f"Processing chunk {start_idx//chunk_size + 1} of {total_chunks}...")
+    current_chunk_idx = start_idx // chunk_size + 1
+    print(f"Processing chunk {current_chunk_idx} of {total_chunks}...")
     
     success = False
+    attempts = 0
+    
+    human_examples = get_random_human_examples(10)
+    
     while not success:
         try:
-            batch_results = generate_data(chunk)
+            batch_results = generate_batch(chunk, human_examples)
             append_to_raw_tsv(level, chunk, batch_results)
             success = True # This breaks the 'while not success' loop
-            
-            # Optional small breath to keep the API happy
-            time.sleep(5)
-            
         except Exception as e:
-            err_msg = str(e)
-            if is_quota_error(err_msg):
-                retry_match = re.search(r"'retryDelay':\s*'(\d+)s'", err_msg)
-            
-                if retry_match:
-                    delay = int(retry_match.group(1)) + 2 # Adding safety buffer
-                    print(f"    Quota hit. Waiting {delay}s per API request...")
-                    time.sleep(delay)
-                else:
-                    print("    Quota hit. No delay found, waiting 30s...")
-                    time.sleep(30)
-            else:
-                # 'success' remains False, so the 'while' loop tries the same chunk again
-                print(f"    Permanent error at {chunk}: {e}")
-                print("    Waiting 10s before retrying current chunk...")
-                time.sleep(10)
+            # 'success' remains False, so the 'while' loop tries the same chunk again
+            if attempts >= 3:
+                print("    Max attempts reached. Skipping to next chunk...")
                 
                 # break out of the "while" loop on permanent error (to avoid infinite loop)
                 break
+            
+            attempts += 1
+            print(f"    Error at {current_chunk_idx} of {total_chunks} (attempt {attempts}): {e}")
+            
+            # Wait 10 seconds before trying again
+            time.sleep(10)
+
+    # Optional small breath to keep the API happy
+    time.sleep(2)
 
 # %%
