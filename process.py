@@ -11,7 +11,7 @@ from google import genai
 from google.api_core import exceptions
 from google.genai import types
 from dotenv import load_dotenv
-from utils import BatchWordResult, append_to_raw_tsv, SYSTEM_PROMPT, EXAMPLE_RESPONSE, get_random_human_examples
+from utils import BatchWordResult, append_to_raw_tsv, SYSTEM_PROMPT, get_random_human_examples
 
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
@@ -35,6 +35,8 @@ level = 4
 output_file = f"data/raw/level{level}.tsv"
 
 # %%
+# Card generation
+
 def generate_batch(batch_items: list[str], human_examples: List[Dict[str, Any]]) -> BatchWordResult:
     few_shot = "### GOLD STANDARD EXAMPLES:\n"
     for ex in human_examples:
@@ -122,3 +124,6 @@ for start_idx in range(0, len(words_to_process), chunk_size):
     time.sleep(2)
 
 # %%
+# Completion
+
+print("Done! All words processed.")
