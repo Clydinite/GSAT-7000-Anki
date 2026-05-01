@@ -5,13 +5,13 @@ import time
 from typing import List, Dict, Optional
 from google import genai
 from dotenv import load_dotenv
-from utils import BatchWordResult, SYSTEM_PROMPT
+from utils import BatchWordResult, SYSTEM_PROMPT, get_common_parser
 
 load_dotenv()
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY"), 
     http_options={
-        "timeout": 180_000 # 2 minutes
+        "timeout": 180_000 # 3 minutes
     }
 )
 
@@ -59,7 +59,10 @@ def edit_batch(batch_items: List[Dict[str, str]]) -> Optional[BatchWordResult]:
 
 def main() -> None:
     # Configurations
-    edit_level = 4
+    parser = get_common_parser("Level of audited cards to actually fix.")
+    args = parser.parse_args()
+    
+    edit_level = args.level
     batch_size = 10
 
     file_path = f"data/raw/level{edit_level}.tsv"

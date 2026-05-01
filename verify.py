@@ -5,7 +5,7 @@ import time
 from typing import List, Optional, Dict, Any
 from google import genai
 from dotenv import load_dotenv
-from utils import BatchVerificationResult, VerificationResult, get_random_human_examples, SYSTEM_PROMPT
+from utils import BatchVerificationResult, VerificationResult, get_random_human_examples, SYSTEM_PROMPT, get_common_parser
 
 load_dotenv()
 client = genai.Client(
@@ -33,6 +33,8 @@ Your primary goal is to find errors. You are a "Critic AI" - your default assump
 - MISSING_COLLOCATIONS: Does not include important usage patterns.
 - AWKWARD_TRANSLATION: The Tradition Chinese is unnatural.
 - SENTENCE_TOO_SHORT: The sentence is too short.
+- CANNOT_INFER: Cannot infer the meaning of the headword from the sentence.
+- UNEXEMPLIFIED_EXPLANATION: The mentioned explanation has no corresponding examples.
 - OTHER_ISSUE: Other weird issues not already mentioned.
 
 ### ORIGINAL SYSTEM PROMPT (The "Creator's" Instructions, see if its work matches the system prompt. If not, FAIL):
@@ -70,7 +72,10 @@ def verify_batch(batch_items: List[Dict[str, str]], human_examples: List[Dict[st
 
 def main() -> None:
     # Configurations
-    verify_level = 4
+    parser = get_common_parser("Level to audit.")
+    args = parser.parse_args()
+    
+    verify_level = args.level
     batch_size = 25
 
     human_examples = get_random_human_examples(10)

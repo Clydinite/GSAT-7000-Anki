@@ -11,7 +11,7 @@ from google import genai
 from google.api_core import exceptions
 from google.genai import types
 from dotenv import load_dotenv
-from utils import BatchWordResult, append_to_raw_tsv, SYSTEM_PROMPT, get_random_human_examples
+from utils import BatchWordResult, append_to_raw_tsv, SYSTEM_PROMPT, get_random_human_examples, get_common_parser, ScriptArgs
 
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
@@ -34,9 +34,12 @@ print(f"System prompt:\n{SYSTEM_PROMPT}")
 # %%
 # Configuration
 
+parser = get_common_parser("Generate vocabulary cards.")
+args = parser.parse_args()
+
 origin = "data/vocabulary"
 
-level = 5
+level = args.level
 output_file = f"data/raw/level{level}.tsv"
 
 # %%

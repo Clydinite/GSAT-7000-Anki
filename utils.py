@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+from argparse import Namespace, ArgumentParser
 from typing import List, Optional, Literal
 from pydantic import BaseModel
 
@@ -62,6 +63,17 @@ def append_to_raw_tsv(level: int, words: List[str], batch_results: BatchWordResu
             raw_string: str = words[idx] if idx < len(words) else r.headword
             writer.writerow([r.headword, raw_string, r.model_dump_json(), verification, comment, attempts])
         f.flush()
+
+# --- CLI configuration ---
+class ScriptArgs(Namespace):
+    level: str
+    
+def get_common_parser(description: str) :
+    """Common parser for all scripts."""
+    parser = ArgumentParser(description=description)
+    parser.add_argument("--level", "-l", type=int, choices=range(1, 7), required=True, help="Level to be generated/verified/edited. Must be between 1 and 6.")
+    
+    return parser
 
 EXAMPLE_RESPONSE = {
   "headword": "account",

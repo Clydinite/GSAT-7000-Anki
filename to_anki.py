@@ -3,6 +3,7 @@ import json
 import re
 import os
 import html
+from utils import get_common_parser
 
 def format_sentence(sentence):
     """Adds styling spans to the sentence markers."""
@@ -84,7 +85,10 @@ def convert_to_anki(input_file, output_file):
         print(f"Successfully converted {count} words to {output_file}")
 
 if __name__ == "__main__":
-    level = 3
+    parser = get_common_parser("Level to convert to Anki TSV")
+    args = parser.parse_args()
+    
+    level = args.level
     
     os.makedirs("data/Anki", exist_ok=True)
     convert_to_anki(f"data/raw/level{level}.tsv", f"data/Anki/level{level}_import.tsv")
