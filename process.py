@@ -19,7 +19,12 @@ API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("Please set the GEMINI_API_KEY environment variable.")
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY"), 
+    http_options={
+        "timeout": 180_000 # 2 minutes
+    }
+)
 
 # %%
 # Information
@@ -31,7 +36,7 @@ print(f"System prompt:\n{SYSTEM_PROMPT}")
 
 origin = "data/vocabulary"
 
-level = 4
+level = 5
 output_file = f"data/raw/level{level}.tsv"
 
 # %%

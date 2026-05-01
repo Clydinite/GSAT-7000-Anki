@@ -8,7 +8,12 @@ from dotenv import load_dotenv
 from utils import BatchVerificationResult, VerificationResult, get_random_human_examples, SYSTEM_PROMPT
 
 load_dotenv()
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY"), 
+    http_options={
+        "timeout": 60_000 # 1 minute
+    }
+)
 
 # --- Auditor Prompt ---
 AUDITOR_SYSTEM_PROMPT = f"""

@@ -8,7 +8,12 @@ from dotenv import load_dotenv
 from utils import BatchWordResult, SYSTEM_PROMPT
 
 load_dotenv()
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY"), 
+    http_options={
+        "timeout": 180_000 # 2 minutes
+    }
+)
 
 # --- Editor Prompt ---
 EDITOR_SYSTEM_PROMPT = f"""
@@ -105,7 +110,10 @@ def main() -> None:
                 writer.writerows(rows)
             print(f"    Batch complete and saved. Total fixed: {updated_count}")
         else:
-            print("    Error: API failure or batch size mismatch. Skipping.")
+            if fixed_batch and len(fixed_batch.results) != len(batch_items):
+                print(f"    Error: Batch size mismatch (required {len(batch_items)}, got {len(fixed_batch.results)}). Skipping batch.")
+            else:
+                print(f"    Error: API failure. Skipping batch.")
         
         time.sleep(2)
 
