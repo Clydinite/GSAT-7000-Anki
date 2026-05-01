@@ -24,6 +24,7 @@ class BatchWordResult(BaseModel):
     results: List[WordResult]
 
 class VerificationResult(BaseModel):
+    headword: str
     status: Literal["pass", "fail"]
     comment: str  # Natural language description of the problem
 
