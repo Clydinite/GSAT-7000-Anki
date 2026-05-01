@@ -17,6 +17,7 @@ Your primary goal is to find errors. You are a "Critic AI" - your default assump
 
 ### FAILURE CHECKLIST (FAIL if any are true):
 - TAG_SCOPE_ERROR: Tagged a simple noun/object or common article.
+- INVERTED_TAGS: The pattern and target tags are inverted.
 - INCOMPLETE_PATTERN: Missing the key preposition or particle that makes the phrase a "collocation".
 - DENSITY_ERROR: Versatile words (like 'account', 'leave', 'strike') have fewer than 3-4 example sentences.
 - MISSING_EXAMPLES: Critical collocations are not covered.
@@ -50,7 +51,7 @@ def verify_batch(batch_items: List[Dict[str, str]], human_examples: List[Dict[st
                 "system_instruction": AUDITOR_SYSTEM_PROMPT,
                 "response_mime_type": "application/json",
                 "response_schema": BatchVerificationResult,
-                "temperature": 1.0,
+                "temperature": 0.3,
                 "thinking_config": {
                     "include_thoughts": False,
                     "thinking_level": "high"
@@ -63,7 +64,9 @@ def verify_batch(batch_items: List[Dict[str, str]], human_examples: List[Dict[st
         return None
 
 def main() -> None:
+    # Configurations
     verify_level = 4
+    batch_size = 25
 
     human_examples = get_random_human_examples(10)
     file_path: str = f"data/raw/level{verify_level}.tsv"
@@ -85,7 +88,6 @@ def main() -> None:
     pending_indices = [i for i, r in enumerate(rows) if r.get("verification") == "none"]
 
     updated_count = 0
-    batch_size = 25
     
     print(f"Auditing {len(pending_indices)} cards in batches of {batch_size} for Level {verify_level}...")
     
@@ -111,7 +113,7 @@ def main() -> None:
                 writer.writerows(rows)
         else:
             if batch_result and len(batch_result.results) != len(batch_items):
-                print(f"    Error: Batch size mismatch. Skipping batch.")
+                print(f"    Error: Batch size mismatch (required {len(batch_items)}, got {len(batch_result.results)}). Skipping batch.")
             else:
                 print(f"    Error: API returned no results. Skipping batch.")
         
