@@ -13,21 +13,13 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 # --- Editor Prompt ---
 EDITOR_SYSTEM_PROMPT = f"""
 You are a high-precision Senior Editor for GSAT English Vocabulary. 
-Your goal is to FIX cards that failed a strict quality audit.
-
-### THE CORE PROBLEM TO FIX:
-The previous AI was "lazy" and often tagged generic nouns (e.g., <target>accurate</target> <pattern>data</pattern>). 
-This is a FAILURE. Nouns like 'data', 'information', or 'method' are rarely high-value collocations.
+Your goal is to FIX cards that has already failed a strict quality audit.
 
 ### YOUR FIXING MANDATE:
-1. Identify the REAL GSAT-style grammatical collocation. This is almost always:
-   - A Preposition (e.g., <target>accurate</target> <pattern>in</pattern>).
-   - A Phrasal Verb Particle (e.g., <pattern>set</pattern> <target>aside</target>).
-   - A specific functional verb (e.g., <pattern>take</pattern> <target>advantage</target> <pattern>of</pattern>).
-2. If the Auditor flags a "Generic Noun" or "Tag Scope Error", you MUST move the <pattern> tags to the correct grammatical connector.
-3. If the current sentence doesn't have a good collocation, YOU MUST REWRITE the sentence to demonstrate a high-value GSAT pattern.
-4. Output the ENTIRE fixed card as valid JSON matching the schema.
-5. DO NOT CHANGE UNMENTIONED FIELDS.
+- Listen to the Auditor's feedback and fix the card accordingly.
+- If the Auditor flags a "Generic Noun" or "Tag Scope Error", you MUST move the <pattern> tags to the correct grammatical connector.
+- Output the ENTIRE fixed card as valid JSON matching the schema.
+- DO NOT CHANGE UNMENTIONED FIELDS.
 
 Original System Prompt for reference:
 {SYSTEM_PROMPT}
@@ -53,22 +45,23 @@ def edit_batch(batch_items: List[Dict[str, str]]) -> Optional[BatchWordResult]:
                     "include_thoughts": False,
                     "thinking_level": "high"
                 }
-            }
+            } # type: ignore
         )
-        return response.parsed
+        return response.parsed # type: ignore
     except Exception as e:
         print(f"Error fixing batch: {e}")
         return None
 
 def main() -> None:
-    # Change level here
-    edit_level = 3
+    # Configurations
+    edit_level = 4
+    batch_size = 10
 
     file_path = f"data/raw/level{edit_level}.tsv"
     if not os.path.exists(file_path): return
 
     rows = []
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, "r", encoding="utf-8") as f:  
         reader = csv.DictReader(f, delimiter="\t")
         fieldnames = reader.fieldnames
         rows = list(reader)
@@ -85,11 +78,9 @@ def main() -> None:
         print("No cards need fixing.")
         return
 
-
     updated_count = 0
-    batch_size = 10
     
-    print(f"Surgically fixing {len(pending_indices)} cards in batches of {batch_size} for Level {edit_level}...")
+    print(f"Fixing {len(pending_indices)} cards in batches of {batch_size} for Level {edit_level}...")
     
     for i in range(0, len(pending_indices), batch_size):
         batch_idx_chunk = pending_indices[i : i + batch_size]
