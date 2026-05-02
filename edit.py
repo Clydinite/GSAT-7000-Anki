@@ -18,13 +18,14 @@ client = genai.Client(
 # --- Editor Prompt ---
 EDITOR_SYSTEM_PROMPT = f"""
 You are a high-precision Senior Editor for GSAT English Vocabulary. 
-Your goal is to FIX cards that has already failed a strict quality audit.
+Your goal is to FIX cards that has already failed a strict quality audit. The key is to fix the flashcard.
 
 ### YOUR FIXING MANDATE:
 - Listen to the Auditor's feedback and fix the card accordingly.
 - If the Auditor flags a "Generic Noun" or "Tag Scope Error", you MUST move the <pattern> tags to the correct grammatical connector.
 - Output the ENTIRE fixed card as valid JSON matching the schema.
-- DO NOT CHANGE UNMENTIONED FIELDS.
+- Never include any explanation on how the card is fixed. The explanation slot does not work like that.
+- DO NOT CHANGE ANY UNMENTIONED FIELDS.
 
 Original System Prompt for reference:
 {SYSTEM_PROMPT}
@@ -79,7 +80,7 @@ def main() -> None:
     # Target cards marked ai_fail with less than 3 attempts
     pending_indices = [
         i for i, r in enumerate(rows) 
-        if r.get("verification") == "ai_fail" and int(r.get("attempts", 0)) < 3
+        if r.get("verification") == "ai_fail" and int(r.get("attempts", 0)) <= 3
     ]
     
     if not pending_indices:
