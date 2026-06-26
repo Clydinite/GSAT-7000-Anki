@@ -108,7 +108,7 @@ if replace_mode and os.path.exists(output_file):
     human_rows = [r for r in rows if r.get("verification") == "human"]
     
     with open(output_file, "w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t") 
         writer.writeheader()
         writer.writerows(human_rows)
 
@@ -121,7 +121,7 @@ print(f"Level {level} Status: {len(processed_words)} words protected/done. {len(
 # %%
 # Processing loop
 
-chunk_size = 10
+chunk_size = 5
 total_chunks = (len(words_to_process) + chunk_size - 1) // chunk_size
 
 for start_idx in range(0, len(words_to_process), chunk_size):
