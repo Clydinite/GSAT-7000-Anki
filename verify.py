@@ -2,10 +2,10 @@ import json
 import os
 import csv
 import time
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 from google import genai
 from dotenv import load_dotenv
-from utils import BatchVerificationResult, VerificationResult, get_random_human_examples, SYSTEM_PROMPT, get_common_parser
+from utils import BatchVerificationResult, VerificationResult, get_few_shots, SYSTEM_PROMPT, get_common_parser, Flashcard, BatchFlashcard
 
 load_dotenv()
 client = genai.Client(
@@ -53,10 +53,11 @@ For each card in the batch:
 {SYSTEM_PROMPT}
 """
 
-def verify_batch(batch_items: List[Dict[str, str]], human_examples: List[Dict[str, Any]]) -> Optional[BatchVerificationResult]:
+def verify_batch(batch_items: List[Dict[str, str]], human_examples: List[Tuple[str, Flashcard]]) -> Optional[BatchVerificationResult]:
     few_shot = "### GOLD STANDARD EXAMPLES (PERFECT):\n"
     for ex in human_examples:
-        few_shot += f"Word: {ex['headword']}\nJSON: {json.dumps(ex['response'], ensure_ascii=False)}\n---\n"
+        (headword, flashcard) = ex
+        few_shot += f"Word: {headword}\nJSON: {flashcard.model_dump_json()}\n---\n"
 
     batch_prompt = f"{few_shot}\n\n### BATCH TO AUDIT (Be very critical):\n"
     for i, item in enumerate(batch_items):
@@ -90,7 +91,7 @@ def main() -> None:
     verify_level = args.level
     batch_size = 25
 
-    human_examples = get_random_human_examples(10)
+    human_examples = get_few_shots()
     file_path: str = f"data/raw/level{verify_level}.tsv"
     
     if not os.path.exists(file_path):
