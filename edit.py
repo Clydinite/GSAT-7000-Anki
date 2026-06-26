@@ -5,7 +5,7 @@ import time
 from typing import List, Dict, Optional
 from google import genai
 from dotenv import load_dotenv
-from utils import BatchWordResult, SYSTEM_PROMPT, get_common_parser
+from utils import BatchFlashcard, SYSTEM_PROMPT, get_common_parser
 
 load_dotenv()
 client = genai.Client(
@@ -31,7 +31,7 @@ Original System Prompt for reference:
 {SYSTEM_PROMPT}
 """
 
-def edit_batch(batch_items: List[Dict[str, str]]) -> Optional[BatchWordResult]:
+def edit_batch(batch_items: List[Dict[str, str]]) -> Optional[BatchFlashcard]:
     batch_prompt = "### BATCH TO FIX:\n"
     for i, item in enumerate(batch_items):
         batch_prompt += f"Card {i+1} ({item['headword']}):\n"
@@ -45,7 +45,7 @@ def edit_batch(batch_items: List[Dict[str, str]]) -> Optional[BatchWordResult]:
             config={
                 "system_instruction": EDITOR_SYSTEM_PROMPT,
                 "response_mime_type": "application/json",
-                "response_schema": BatchWordResult,
+                "response_schema": BatchFlashcard,
                 "temperature": 1.0,
                 "thinking_config": {
                     "include_thoughts": False,

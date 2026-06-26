@@ -3,25 +3,70 @@ import json
 import os
 import random
 from argparse import Namespace, ArgumentParser
+from enum import Enum
 from typing import List, Optional, Literal, Dict, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 # --- State Management ---
+
 VerificationState = Literal["none", "ai_pass", "ai_fail", "human"]
 
-class Example(BaseModel):
-    sentence: str               # e.g., "He <target>accused</target> him <pattern>of</pattern> theft."
-    translation: str            # Traditional Chinese translation
-    explanation: Optional[str]  # Explanation of example sentence.
+# --- Flashcard ---
 
-class WordResult(BaseModel):
-    headword: str               # e.g. accuse
-    explanation: str            # Usage/Grammar note in Traditional Chinese
-    entries: List[Example]      # One word can have multiple POS entries
-    related_forms: List[str]    # e.g., "accused" (verb conjugations, noun forms, etc., no change of meaning, just different forms of the same word)
+class PartOfSpeech(str, Enum):
+    NOUN = "noun"
+    VERB = "verb"
+    ADJECTIVE = "adjective"
+    ADVERB = "adverb"
+    PRONOUN = "pronoun"
+    PREPOSITION = "preposition"
+    CONJUNCTION = "conjunction"
+    INTERJECTION = "interjection"
+    DETERMINER = "determiner"
+    PHRASE = "phrase"
+
+class WordPosTranslation(BaseModel):
+    word: str = Field(..., description="Word")
+    pos: PartOfSpeech = Field(..., description="Part of speech")
+    translation: str = Field(..., description="Traditional Chinese translation")
+    explanation: Optional[str] = Field(None, description="Additional notes in Traditional Chinese")
+
+class Conjugations(BaseModel):
+    past_tense: str = Field(..., description="Past tense")
+    past_participle: str = Field(..., description="Past participle")
     
-class BatchWordResult(BaseModel):
-    results: List[WordResult]
+class Relatives(BaseModel):
+    morphology: str = Field(..., description="The morphology of the headword")
+    related: List[WordPosTranslation]
+
+class Sentence(BaseModel):
+    sentence: str = Field(..., description="Example sentence (e.g., He <target>accused</target> him <pattern>of</pattern> theft.)")
+    translation: str = Field(..., description="Traditional Chinese translation")
+
+class Entry(BaseModel):
+    pattern: str = Field(..., description="Collocation pattern, can be the word itself or a phrase (e.g. to accuse sb. of sth.)")
+    pos: PartOfSpeech = Field(..., description="Part of speech")
+    translation: str = Field(..., description="Traditional Chinese translation")
+    explanation: Optional[str] = Field(None, description="Usage/Grammar note in Traditional Chinese")
+    sentences: List[Sentence]
+
+class Sense(BaseModel):
+    sense: str = Field(..., description="Core meaning in Traditional Chinese")
+    entries: List[Entry]
+
+class Flashcard(BaseModel):
+    headword: str = Field(..., description="Headword")
+    explanation: str = Field(..., description="Usage/Grammar note in Traditional Chinese")
+    senses: List[Sense]
+    conjugations: Optional[Conjugations]
+    relatives: Relatives = Field(..., description="Word families")
+    synonyms: List[WordPosTranslation] = Field(default_factory=list)
+    antonyms: List[WordPosTranslation] = Field(default_factory=list)
+    
+class BatchFlashcard(BaseModel):
+    results: List[Flashcard]
+    
+# --- Verification ---
 
 class VerificationResult(BaseModel):
     headword: str
@@ -60,7 +105,7 @@ def get_random_human_examples(count: int = 10) -> List[dict]:
 
     return examples
 
-def append_to_raw_tsv(level: int, words: List[str], batch_results: BatchWordResult, verification: VerificationState = "none", comment: str = "", attempts: int = 0) -> None:
+def append_to_raw_tsv(level: int, words: List[str], batch_results: BatchFlashcard, verification: VerificationState = "none", comment: str = "", attempts: int = 0) -> None:
     output_file: str = f"data/raw/level{level}.tsv"
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     file_exists: bool = os.path.exists(output_file) and os.path.getsize(output_file) > 0
@@ -84,33 +129,28 @@ def get_common_parser(description: str) -> ArgumentParser:
     return parser
 
 SYSTEM_PROMPT = """
-Act as a Taiwan GSAT English teacher, providing Anki flashcard content for the given words. Follow the instructions and format strictly.
+Act as a Taiwanese GSAT English teacher and provide Anki flashcard content for the given words. Follow the instructions and format strictly.
 
 Rules:
-- For each word, provide entries for ALL its common parts of speech as included in the parentheses. More could be provided.
-- i+1 principle: Use clear context so the target word's meaning is obvious. It should be that the target word is guessable from the context. Additionally, the example sentences should be at a slightly lower difficulty level than the target word to ensure comprehensibility for GSAT students. For instance, if the target word is a Level 4 word, the example sentences should primarily use Level 2 and Level 3 words, with minimal use of Level 4 words. The example sentence should not contain any words that are significantly more difficult than the target word.
-- Dynamic Sentence Scaling: The number of example sentences must reflect the word's complexity.
-    - For simple or technical words with only one primary meaning (e.g., "aspirin," "photosynthesis"), provide 2–4 high-quality sentences.
-    - For polysemous words (words with multiple meanings, e.g., "strike",account", or "leave"), you must provide 4–6 high-quality sentences to ensure every distinct GSAT-relevant definition and major collocation is covered.
-    - Goal: The more versatile the word, the more sentences you must provide. Do not use a fixed number for every word; prioritize coverage of meaning over a standard count. The number of sentences should be an accurate reflection of the word's complexity and polysemy, not an arbitrary quota.
-- Identify the REAL GSAT-style grammatical collocation. This is almost always:
-    - A Preposition (e.g., <target>accurate</target> <pattern>in</pattern>).
-    - A Phrasal Verb Particle (e.g., <pattern>set</pattern> <target>aside</target>).
-    - A specific functional verb (e.g., <pattern>take</pattern> <target>advantage</target> <pattern>of</pattern>).
+- Parts of Speech & Senses: Include all common senses and all common parts of speech for the given word. Do not leave out high-yield definitions that are frequently tested on the GSAT.
+- The i+1 Principle & Sentence Difficulty Scaling: Example sentences must provide rich, descriptive context so that the meaning of the target word is highly clear and guessable. To ensure absolute comprehensibility for GSAT students, the vocabulary surrounding the target word must be at a slightly lower difficulty level than the target word itself (e.g., if the target word is Level 4, the sentence should primarily use Level 2 and Level 3 words). Never use surrounding words that are more difficult than the target word itself.
+- Sentence Length & Themes: Each example sentence must be between 15 and 35 words long. Contexts should revolve around academic, social, environmental, or school-life themes common in the GSAT, though lighthearted or relatable scenario prompts are also highly encouraged.
 
-Fields:
-- headword: The base form of the word. The headword field should not include any POS tags or parentheses, just the base form of the word. (e.g "achieve", not "achieve (n.)", "achieve (v.)", or "achieve(ment) (n./v.)" etc.)
-- explanation: High-value GSAT usage note in Traditional Chinese. Common mistakes should be explained. There's no need to mention "GSAT" or other filler words in the explanation.
-- entries: List of example sentences with:
-   - sentence:
-        - Length: 15-35 words.
-        - Context: Use academic, social, or school-life themes common in GSAT.
-        - Marking:
-             - Use <target>...</target> for the headword
-                 - The entire conjugated or inflected form of the headword must be inside <target>...</target>. (e.g. <target>accused</target> for "accuse", not <target>accuse</target>d; <target>achievement</target> for "achieve", not <target>achieve</target>ment.)
-                 - Never use <target>...</target> for multiple words, only the conjugated or inflected form of the headword.
-             - Use <pattern>...</pattern> for the key collocations of the headword. Never use <pattern>...</pattern> for the headword itself, or other parts of the sentence. (e.g. "When planning the graduation trip, the committee <pattern>took</pattern> the students' safety <pattern>into</pattern> <target>account</target> to avoid any potential accidents." In this sentence, "safety", "accident", etc., should NOT be marked as it's not a collocation of the headword "account". Only "take" and "into" should be marked as collocations of "account". Another example: "Students should <pattern>take</pattern> <target>advantage</target> <pattern>of</pattern> the school's career counseling services to explore their future options.") Additionally, it's also reasonable to mark anything other than prepositions if it's a frequent collocation of the headword (e.g. "Many companies <pattern>place</pattern> <target>advertisements</target> <pattern>in</pattern> newspapers and magazines to inform potential customers about their latest products and services.") It's possible for the collocation to not be adjacent to the headword, provided that it's indeed a collocation.
-   - translation: Traditional Chinese translation of the sentence.
-   - explanation: Usage note for this specific example. Should not contain any Markdown tags like `* ... *` or `** ... **` or any XML tags (`<pattern> ... </pattern>` and `<target> ... </target>`)
-- related_forms: List[str] of relevant word family members, like verb conjugations or the noun form. The meaning should remain the same. (e.g. "market" and "marketing" are not related forms because they have different meanings, but "count" and "countable" are related forms because they are just different forms of the same word.)
+Fields Guide:
+- headword: The base form of the word. Do not include any POS tags, parentheses, or suffix variations here (e.g., use "achieve", not "achieve (v.)" or "achieve(ment)").
+- explanation: A high-value usage note in Traditional Chinese focusing on syntax, common errors, or core conceptual metaphors. Avoid filler words or explicitly mentioning the acronym "GSAT".
+- senses: A list of core semantic clusters.
+- entries: A list of distinct collocation patterns or phrases belonging to that specific sense.
+    - pattern: The specific grammatical structure or formula (e.g., "accuse sb. of sth.", "object to sth./doing sth.").
+    - pos: The part of speech enum value matching the pattern ("phrase" should be used when the entry represents a multi-word idiom or fixed prepositional structure rather than a standalone word class).
+    - explanation: A clear grammatical or contextual usage note in Traditional Chinese. Crucial: This field must remain plain text. Do not use Markdown styling (* or **) or XML tags (<target> or <pattern>) inside this specific field.
+    - sentences: A list of example sentences matching the pattern.
+        - Text Marking Rules: 
+            - Wrap the exact inflected, conjugated, or derived form of the headword inside `<target>...</target>` tags. The entire word variant must be enclosed (e.g., `<target>accused</target>`, NOT `<target>accuse</target>d`). Never span these tags across multiple words.
+            - Wrap the essential accompanying elements of the collocation formula (such as fixed prepositions, dependent verbs, or nouns) inside `<pattern>...</pattern>` tags. Never wrap the headword itself in pattern tags.
+- conjugations: Provide the past tense and past participle strings if the headword functions as a verb. Set to null if the word does not have verb inflections.
+- relatives: A structured word-family object.
+    - morphology: A brief textual breakdown in Traditional Chinese highlighting the shared prefix, root, or suffix blocks (e.g., "字首 pre- (預先) + 字根 dict (說)").
+    - related: A list of words sharing this morphological framework. Use these entries to expand the student's pattern recognition of word stems and structural suffixes.
+- synonyms / antonyms: Lists of contextual equivalents or opposites using the `WordPosTranslation` model to ensure parts of speech align cleanly.
 """

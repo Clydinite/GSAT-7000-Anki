@@ -11,7 +11,7 @@ from google import genai
 from google.api_core import exceptions
 from google.genai import types
 from dotenv import load_dotenv
-from utils import BatchWordResult, append_to_raw_tsv, SYSTEM_PROMPT, get_random_human_examples, get_common_parser, ScriptArgs
+from utils import BatchFlashcard, append_to_raw_tsv, SYSTEM_PROMPT, get_random_human_examples, get_common_parser, ScriptArgs
 
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
@@ -49,7 +49,7 @@ output_file = f"data/raw/level{level}.tsv"
 # %%
 # Card generation
 
-def generate_batch(batch_items: list[str], human_examples: List[Dict[str, Any]]) -> BatchWordResult:
+def generate_batch(batch_items: list[str], human_examples: List[Dict[str, Any]]) -> BatchFlashcard:
     few_shot = "### GOLD STANDARD EXAMPLES:\n"
     for ex in human_examples:
         few_shot += f"Word: {ex['headword']}\nJSON: {json.dumps(ex['response'], ensure_ascii=False)}\n---\n"
@@ -63,7 +63,7 @@ def generate_batch(batch_items: list[str], human_examples: List[Dict[str, Any]])
         contents=batch_prompt,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
-            response_schema=BatchWordResult,
+            response_schema=BatchFlashcard,
             temperature=0.8,
             thinking_config=types.ThinkingConfig(thinking_level="high") # type: ignore
         ),
