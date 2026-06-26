@@ -5,7 +5,7 @@ import time
 from typing import List, Dict, Optional
 from google import genai
 from dotenv import load_dotenv
-from utils import BatchFlashcard, SYSTEM_PROMPT, get_common_parser
+from utils import BatchFlashcard, SYSTEM_PROMPT, get_common_parser, get_few_shots, Flashcard
 
 load_dotenv()
 client = genai.Client(
@@ -101,7 +101,7 @@ def main() -> None:
         if fixed_batch and len(fixed_batch.results) == len(batch_items):
             for fixed_data, row_idx in zip(fixed_batch.results, batch_idx_chunk):
                 # Use json.dumps for readable spacing
-                rows[row_idx]["response"] = json.dumps(fixed_data.model_dump(), ensure_ascii=False)
+                rows[row_idx]["response"] = fixed_data.model_dump_json()
                 rows[row_idx]["verification"] = "none" # Reset to none for re-audit
                 rows[row_idx]["comment"] = "" # Clear old auditor feedback
                 rows[row_idx]["attempts"] = str(int(rows[row_idx].get("attempts", 0)) + 1)
