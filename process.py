@@ -6,12 +6,12 @@ import time
 import os
 import csv
 import re
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Tuple
 from google import genai
 from google.api_core import exceptions
 from google.genai import types
 from dotenv import load_dotenv
-from utils import BatchFlashcard, append_to_raw_tsv, SYSTEM_PROMPT, get_random_human_examples, get_common_parser, ScriptArgs
+from utils import BatchFlashcard, append_to_raw_tsv, SYSTEM_PROMPT, get_few_shots, get_common_parser, ScriptArgs, Flashcard
 
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
@@ -49,10 +49,11 @@ output_file = f"data/raw/level{level}.tsv"
 # %%
 # Card generation
 
-def generate_batch(batch_items: list[str], human_examples: List[Dict[str, Any]]) -> BatchFlashcard:
+def generate_batch(batch_items: list[str], human_examples: List[Tuple[str, Flashcard]]) -> BatchFlashcard:
     few_shot = "### GOLD STANDARD EXAMPLES:\n"
     for ex in human_examples:
-        few_shot += f"Word: {ex['headword']}\nJSON: {json.dumps(ex['response'], ensure_ascii=False)}\n---\n"
+        (headword, flashcard) = ex
+        few_shot += f"Word: {headword}\nJSON: {flashcard.model_dump_json()}\n---\n"
     
     batch_prompt = SYSTEM_PROMPT
     batch_prompt += few_shot
@@ -131,7 +132,7 @@ for start_idx in range(0, len(words_to_process), chunk_size):
     success = False
     attempts = 0
     
-    human_examples = get_random_human_examples(10)
+    human_examples = get_few_shots()
     
     while not success:
         try:
