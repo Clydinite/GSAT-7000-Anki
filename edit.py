@@ -18,14 +18,17 @@ client = genai.Client(
 # --- Editor Prompt ---
 EDITOR_SYSTEM_PROMPT = f"""
 You are a high-precision Senior Editor for GSAT English Vocabulary. 
-Your goal is to FIX cards that has already failed a strict quality audit. The key is to fix the flashcard.
+Your goal is to FIX cards that have already failed a strict quality audit.
 
 ### YOUR FIXING MANDATE:
-- Listen to the Auditor's feedback and fix the card accordingly.
-- If the Auditor flags a "Generic Noun" or "Tag Scope Error", you MUST move the <pattern> tags to the correct grammatical connector.
-- Output the ENTIRE fixed card as valid JSON matching the schema.
-- Never include any explanation on how the card is fixed. The explanation slot does not work like that.
-- DO NOT CHANGE ANY UNMENTIONED FIELDS.
+- Fix the flashcard based on the Auditor's feedback.
+- If the Auditor flags an issue, you MUST modify the JSON to correct the structure, content, or tags.
+- Output the ENTIRE fixed card as valid JSON matching the Flashcard schema.
+- NEVER include any conversational explanation.
+- DO NOT CHANGE ANY FIELDS UNLESS THEY ARE PART OF THE FIX.
+
+### SCHEMA REFERENCE:
+{Flashcard.model_json_schema()}
 
 Original System Prompt for reference:
 {SYSTEM_PROMPT}
