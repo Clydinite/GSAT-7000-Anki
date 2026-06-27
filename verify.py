@@ -102,7 +102,9 @@ def main() -> None:
     rows: List[Dict[str, str]] = []
     with open(file_path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter="\t")
-        fieldnames: Optional[List[str]] = reader.fieldnames
+        if not reader.fieldnames:
+            raise Exception("No fieldnames found in TSV file.")
+        fieldnames: List[str] = list(reader.fieldnames)
         rows = list(reader)
 
     if not fieldnames: return

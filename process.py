@@ -104,6 +104,9 @@ if replace_mode and os.path.exists(output_file):
         fieldnames = reader.fieldnames
         rows = list(reader)
     
+    if not fieldnames:
+        raise Exception("No fieldnames found in TSV file.")
+    
     # Keep only human verified rows in the level file
     human_rows = [r for r in rows if r.get("verification") == "human"]
     
