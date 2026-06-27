@@ -19,7 +19,11 @@ sample_card = Flashcard.model_validate(
                             {
                                 "sentence": "The radar detected a strange, unidentified <target>object</target> moving at an incredible speed over the ocean.",
                                 "translation": "雷達偵測到一個奇特、不明的物體在海面上以令人難以置信的速度移動。",
-                            }
+                            },
+                            {
+                                "sentence": "The museum display features a collection of everyday <target>object</target>s from the ancient Roman era.",
+                                "translation": "博物館的展覽展示了一系列來自古羅馬時期的日常物品。",
+                            },
                         ],
                     },
                     {
