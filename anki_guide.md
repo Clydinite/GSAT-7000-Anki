@@ -358,25 +358,63 @@ Copy this into your Anki Note Type's **Styling** section.
   margin-right: 4px;
 }
 
-/* --- Highlighting --- */
-.target-word {
-  color: hsl(var(--accent));
-  font-weight: 600;
-  background: hsla(217, 91%, 60%, 0.1);
-  padding: 0 2px;
-  border-radius: 2px;
+/* --- Styling for Hierarchical Senses --- */
+.senses-container {
+  margin-top: 24px;
 }
 
-.collocation {
-  font-weight: 600;
+.sense {
+  display: flex;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.sense-number {
+  color: hsl(var(--accent));
+  font-weight: 700;
+  margin-right: 8px;
+}
+
+.sense-text {
   color: hsl(var(--primary));
-  text-decoration: underline;
-  text-decoration-color: hsl(var(--accent));
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
-  background: hsla(0, 0%, 100%, 0.05);
-  padding: 0 2px;
-  border-radius: 2px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.pattern-label {
+  font-family: monospace;
+  background: hsl(var(--muted));
+  color: hsl(var(--accent));
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  margin-bottom: 8px;
+  display: inline-block;
+  font-weight: 600;
+}
+
+.conjugations {
+  font-size: 0.9em;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 16px;
+  padding: 8px;
+  background: hsla(240, 3.7%, 15.9%, 0.3);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.morphology {
+  font-size: 0.9em;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+.related-item {
+  font-size: 0.85em;
+  color: hsl(var(--accent));
+  margin-left: 12px;
+  margin-top: 4px;
 }
 
 /* Mobile Adjustments */
