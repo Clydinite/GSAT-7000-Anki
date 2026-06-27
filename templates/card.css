@@ -1,210 +1,244 @@
-:root {
-  --background: 0 0% 8%;
-  --foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --muted: 0 0% 20%;
-  --accent: 217 91% 60%;
-  --border: 0 0% 25%;
-  --success: 142 70% 45%;
+/* ==========================================================================
+   SHADCN/UI STRICT DIGITAL DARK THEME
+   ========================================================================== */
 
-  /* POS Palette */
-  --noun: #fb923c;
-  --verb: #60a5fa;
-  --adj: #4ade80;
-  --adv: #f472b6;
-  --phrase: #a1a1aa;
+:root, .nightMode {
+  --background: #09090b;       /* zinc-950 */
+  --foreground: #fafafa;       /* zinc-50 */
+  --card: #09090b;
+  --border: #27272a;           /* zinc-800 */
+  --input: #27272a;
+  --muted: #18181b;            /* zinc-900 */
+  --muted-foreground: #a1a1aa; /* zinc-400 */
+  --accent: #27272a;           /* zinc-800 */
+  --accent-foreground: #fafafa;
+  --primary: #fafafa;
+  
+  --radius: 8px;
+  --radius-sm: 4px;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-.anki-card-content {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-  padding: 40px;
-  max-width: 600px;
-  margin: 0 auto;
-  border-radius: 16px;
-  border: 1px solid hsl(var(--border));
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Typography */
+.card {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Structural cleanup */
+.content-area .anki-card-content > .headword { display: none; }
+
+/* --- Typographical Header --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  background-color: var(--muted);
+  padding: 2px 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  margin-bottom: 16px;
+}
+
 .headword {
-  text-align: center;
-  font-size: 48px;
-  font-weight: 800;
-  margin: 0 0 8px 0;
-  color: hsl(var(--primary));
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 0 0 16px 0;
 }
 
-.conjugations {
-  text-align: center;
-  font-size: 13px;
-  color: hsl(var(--muted-foreground));
-  margin-bottom: 24px;
-  font-family: monospace;
+.separator {
+  border: 0;
+  height: 1px;
+  background-color: var(--border);
+  margin: 0 0 20px 0;
 }
 
-.general-explanation {
-  font-size: 15px;
-  color: #ccc;
-  margin-bottom: 32px;
-  text-align: center;
-  font-style: italic;
-}
-
-/* --- Original-Style Logic (Restored) --- */
-
-/* 1. General Explanation: Blur-to-Reveal Logic */
+/* --- Blur Reveal Area --- */
 .general-explanation {
   position: relative;
-  font-size: 15px;
-  padding: 20px;
-  background: hsl(0, 0%, 12%);
-  border-left: 4px solid hsl(var(--accent));
-  border-radius: 8px;
-  color: #ddd;
-  margin-bottom: 32px;
+  font-size: 0.95rem;
   line-height: 1.6;
-  filter: blur(6px);
-  transition: filter 0.4s ease;
-  cursor: pointer;
-  user-select: none;
+  color: var(--foreground);
+  background-color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
 }
+.blur-reveal-container:not(.revealed) { filter: blur(5px); cursor: pointer; }
+.blur-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(9,9,11,0.2); }
 
-.general-explanation.revealed {
-  filter: blur(0);
-  cursor: default;
-}
-
-/* 2. Accordions for Entries */
+/* --- Dropdown / Accordion Trigger (Injected by back.html) --- */
 .accordion-trigger {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background-color: transparent;
+  border: 1px solid var(--input);
+  border-radius: var(--radius);
   padding: 12px 16px;
-  background: hsl(0, 0%, 15%);
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
   cursor: pointer;
-  margin: 16px 0;
+  transition: background-color 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
-
-.accordion-content {
-  display: none;
-  padding: 16px;
-  background: hsl(0, 0%, 10%);
-  border-radius: 8px;
-  margin-bottom: 16px;
+.accordion-trigger:hover, .accordion-trigger:active, .accordion-trigger.active {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
 }
+.chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--muted-foreground);
+  transition: transform 0.2s ease;
+}
+.accordion-trigger.active .chevron { transform: rotate(180deg); }
 
+/* --- Dropdown Content Layout (.meta-section) --- */
+.accordion-content { display: none; }
 .accordion-content.expanded {
-  display: block;
-}
-
-
-/* Senses & Entries */
-.sense {
   display: flex;
-  align-items: baseline;
-  margin: 24px 0 12px 0;
-  border-bottom: 1px solid hsl(var(--border));
-  padding-bottom: 8px;
-}
-
-.sense-number {
-  color: hsl(var(--accent));
-  font-weight: 800;
-  margin-right: 12px;
-}
-
-.sense-text {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.entry {
-  margin-left: 24px;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 4px 8px 4px;
+  border-bottom: 1px solid var(--border);
   margin-bottom: 24px;
+  animation: slideDown 0.2s ease-out;
 }
 
-.pattern-container {
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Structured Blocks Inside Dropdown */
+.meta-block {
   display: flex;
-  align-items: center;
-  margin-bottom: 8px;
+  flex-direction: column;
+  gap: 8px;
 }
-
-/* POS Tags */
-.pos-tag {
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: #000;
-  margin-right: 8px;
-}
-
-.pos-noun {
-  background: var(--noun);
-}
-
-.pos-verb {
-  background: var(--verb);
-}
-
-.pos-adjective {
-  background: var(--adj);
-}
-
-.pos-adverb {
-  background: var(--adv);
-}
-
-.pos-phrase {
-  background: var(--phrase);
-}
-
-.pattern-label {
-  font-family: monospace;
-  font-size: 14px;
+.meta-label {
+  font-size: 0.75rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+.morphology-text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--foreground);
+  margin: 0;
 }
 
-/* Sentences */
-.sentence-row {
+/* Unordered Lists for Thesaurus / Relatives */
+.meta-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.meta-list-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 8px;
+  font-size: 0.875rem;
+  background-color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
 }
+.item-word { font-weight: 600; color: var(--foreground); }
+.item-trans { color: var(--muted-foreground); margin-left: auto; text-align: right; }
 
-.sentence {
-  font-size: 16px;
-  line-height: 1.5;
+/* Conjugations Segment Grid Layout */
+.conjugations-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.conj-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
 }
+.conj-header { font-size: 0.7rem; color: var(--muted-foreground); margin-bottom: 4px; }
+.conj-value { font-size: 0.9rem; font-weight: 600; font-family: monospace; color: var(--foreground); }
 
-.target-word {
-  color: hsl(var(--accent));
+/* --- Core Meanings & Cards Display (Bottom Section) --- */
+.senses-container { display: flex; flex-direction: column; gap: 28px; margin-top: 16px; }
+.sense-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.sense-idx {
+  font-size: 0.75rem;
   font-weight: 700;
+  font-family: monospace;
+  background-color: var(--foreground);
+  color: var(--background);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
+.sense-title { font-size: 1rem; font-weight: 600; margin: 0; color: var(--foreground); }
 
-.collocation {
-  text-decoration: underline;
-  text-decoration-color: hsl(var(--accent));
+.entry-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  gap: 12px;
+  background-color: transparent;
 }
+.pattern-header { display: flex; align-items: center; gap: 10px; }
+.pattern-code { font-family: monospace; font-size: 0.95rem; font-weight: 600; color: var(--foreground); }
+.pattern-translation { font-size: 0.9rem; color: var(--muted-foreground); font-weight: 500; }
 
-/* Footer Metadata */
-.related-forms {
-  margin-top: 32px;
-  padding-top: 16px;
-  border-top: 1px solid hsl(var(--border));
-  font-size: 13px;
-  color: #888;
+/* Context Sentences and Inline Text Formatting */
+.sentence-item {
+  border-left: 2px solid var(--border);
+  padding-left: 12px;
+  margin-left: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
+.sentence-en { font-size: 0.95rem; line-height: 1.5; color: var(--foreground); margin: 0; }
+.sentence-zh { font-size: 0.85rem; color: var(--muted-foreground); margin: 0; }
 
-.related-item {
-  margin-bottom: 4px;
-}
+/* Text Inline Highlights */
+.target-word { font-weight: 700; color: var(--foreground); text-decoration: underline; text-underline-offset: 4px; }
+.collocation { font-weight: 600; color: #fcd34d; background-color: rgba(245, 158, 11, 0.15); padding: 1px 4px; border-radius: 4px; }
+
+.entry-note { font-size: 0.85rem; color: var(--muted-foreground); line-height: 1.5; border-top: 1px dashed var(--border); padding-top: 12px; margin-top: 4px; }
+
+/* --- Generic Global POS Badges (Muted Zinc Palette) --- */
+.pos-tag, .pos-badge { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; width: fit-content; }
+.pos-noun { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
+.pos-verb { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+.pos-adj  { background-color: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.2); }
+.pos-adv  { background-color: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.2); }
+.pos-phrase { background-color: rgba(113, 113, 122, 0.15); color: #a1a1aa; border: 1px solid rgba(113, 113, 122, 0.2); }

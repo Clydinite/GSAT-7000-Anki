@@ -21,72 +21,98 @@ def strip_tags(text: str) -> str:
 
 def generate_html(card: Flashcard) -> str:
     html_parts = ['<div class="anki-card-content">']
-    # Big Headword
-    html_parts.append(f'<h1 class="headword">{html.escape(card.headword)}</h1>')
     
-    # Conjugations
-    if card.conjugations:
-        html_parts.append(f'<div class="conjugations">Past: {card.conjugations.past_tense} | PP: {card.conjugations.past_participle}</div>')
-
-    # Headword explanation
+    # 1. Header Block
+    html_parts.append(f'<h1 class="headword">{html.escape(card.headword)}</h1>')
     if card.explanation:
         html_parts.append(f'<div class="general-explanation">{html.escape(card.explanation)}</div>')
 
-    # Morphology dropdown
+    # 2. Meta Section (This container is targeted by back.html to create the dropdown)
     html_parts.append('<div class="meta-section">')
-    html_parts.append('<button class="accordion-trigger"><span>Morphology & Relatives</span></button>')
-    html_parts.append('<div class="accordion-content">')
-    html_parts.append(f'<div class="morphology">{html.escape(card.relatives.morphology)}</div>')
-    for rel in card.relatives.related:
-        html_parts.append(f'<div class="related-item">{html.escape(rel.word)} ({rel.pos.value}): {html.escape(rel.translation)}</div>')
-    html_parts.append('</div></div>')
+    
+    # Section A: Morphology
+    html_parts.append('<div class="meta-block">')
+    html_parts.append('<h3 class="meta-label">Morphology</h3>')
+    html_parts.append(f'<p class="morphology-text">{html.escape(card.relatives.morphology)}</p>')
+    html_parts.append('</div>')
+    
+    # Section B: Related Words (Using Unordered List)
+    if card.relatives.related:
+        html_parts.append('<div class="meta-block">')
+        html_parts.append('<h3 class="meta-label">Related Words</h3>')
+        html_parts.append('<ul class="meta-list">')
+        for rel in card.relatives.related:
+            html_parts.append(
+                f'<li class="meta-list-item">'
+                f'<span class="item-word">{html.escape(rel.word)}</span>'
+                f'<span class="pos-badge pos-{rel.pos.value.lower()}">{rel.pos.value.lower()}.</span>'
+                f'<span class="item-trans">{html.escape(rel.translation)}</span>'
+                f'</li>'
+            )
+        html_parts.append('</ul></div>')
+    
+    # Section C: Conjugations
+    if card.conjugations:
+        html_parts.append('<div class="meta-block">')
+        html_parts.append('<h3 class="meta-label">Conjugations</h3>')
+        html_parts.append('<div class="conjugations-grid">')
+        html_parts.append(f'<div class="conj-card"><span class="conj-header">Past</span><span class="conj-value">{html.escape(card.conjugations.past_tense)}</span></div>')
+        html_parts.append(f'<div class="conj-card"><span class="conj-header">Past Part.</span><span class="conj-value">{html.escape(card.conjugations.past_participle)}</span></div>')
+        html_parts.append('</div></div>')
 
-    # Senses and Entries
+    # Section D: Synonyms (Using Unordered List, standard styling)
+    if card.synonyms:
+        html_parts.append('<div class="meta-block">')
+        html_parts.append('<h3 class="meta-label">Synonyms</h3>')
+        html_parts.append('<ul class="meta-list">')
+        for s in card.synonyms:
+            html_parts.append(
+                f'<li class="meta-list-item">'
+                f'<span class="item-word">{html.escape(s.word)}</span>'
+                f'<span class="pos-badge pos-{s.pos.value.lower()}">{s.pos.value.lower()}.</span>'
+                f'<span class="item-trans">{html.escape(s.translation)}</span>'
+                f'</li>'
+            )
+        html_parts.append('</ul></div>')
+
+    # Section E: Antonyms (Using Unordered List, standard styling)
+    if card.antonyms:
+        html_parts.append('<div class="meta-block">')
+        html_parts.append('<h3 class="meta-label">Antonyms</h3>')
+        html_parts.append('<ul class="meta-list">')
+        for a in card.antonyms:
+            html_parts.append(
+                f'<li class="meta-list-item">'
+                f'<span class="item-word">{html.escape(a.word)}</span>'
+                f'<span class="pos-badge pos-{a.pos.value.lower()}">{a.pos.value.lower()}.</span>'
+                f'<span class="item-trans">{html.escape(a.translation)}</span>'
+                f'</li>'
+            )
+        html_parts.append('</ul></div>')
+
+    html_parts.append('</div>') # End of meta-section dropdown
+
+    # 3. Core Senses & Layout (Keeping the acceptable bottom layout, polishing spacing)
     html_parts.append('<div class="senses-container">')
     for i, sense in enumerate(card.senses, 1):
-        html_parts.append(f'<div class="sense"><div class="sense-number">{i}.</div> <div class="sense-text">{html.escape(sense.sense)}</div></div>')
-        
+        html_parts.append(f'<div class="sense-heading"><span class="sense-idx">{i:02d}</span><h2 class="sense-title">{html.escape(sense.sense)}</h2></div>')
         for entry in sense.entries:
-            html_parts.append('<div class="entry">')
+            html_parts.append('<div class="entry-card">')
+            pos_badge = f'<span class="pos-tag pos-{entry.pos.value.lower()}">{entry.pos.value.lower()}</span>'
+            html_parts.append(f'<div class="pattern-header">{pos_badge}<span class="pattern-code">{html.escape(entry.pattern)}</span></div>')
+            html_parts.append(f'<div class="pattern-translation">{html.escape(entry.translation)}</div>')
             
-            # Pattern/POS Row
-            html_parts.append('<div class="pattern-container">')
-            pos_class = f"pos-{entry.pos.value.lower()}"
-            pos_display = entry.pos.value.lower() + "."
-            html_parts.append(f'<span class="pos-tag {pos_class}">{html.escape(pos_display)}</span>')
-            html_parts.append(f'<span class="pattern-label">{html.escape(entry.pattern)} — {html.escape(entry.translation)}</span>')
-            html_parts.append('</div>')
-            
-            # Sentences
+            # Context Sentences
             for s in entry.sentences:
-                clean_tts = html.escape(clean_for_tts(s.sentence), quote=True)
-                html_parts.append('<div class="sentence-row">')
-                html_parts.append(f'<div class="sentence">{format_sentence(s.sentence)}</div>')
-                html_parts.append(f'<button class="tts-button" data-tts="{clean_tts}" onclick="window.playTTS(this.getAttribute(\'data-tts\'))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></button>')
-                html_parts.append('</div>')
-                html_parts.append(f'<div class="translation" style="margin-bottom: 12px; font-size: 0.9em; opacity: 0.8;">{html.escape(s.translation)}</div>')
+                html_parts.append(f'<div class="sentence-item"><p class="sentence-en">{format_sentence(s.sentence)}</p><p class="sentence-zh">{html.escape(s.translation)}</p></div>')
             
-            # Entry Explanation
             if entry.explanation:
-                html_parts.append(f'<div class="entry-explanation" style="margin-bottom: 12px;">{html.escape(entry.explanation)}</div>')
-            html_parts.append('</div>') # end entry
+                html_parts.append(f'<div class="entry-note">{html.escape(entry.explanation)}</div>')
+            html_parts.append('</div>')
+    html_parts.append('</div>')
 
-            
-    html_parts.append('</div>') # end senses-container
-
-    # 4. Synonyms / Antonyms
-    if card.synonyms or card.antonyms:
-        html_parts.append('<div class="related-forms">')
-        if card.synonyms:
-            syns = [f"{s.word} ({s.translation})" for s in card.synonyms]
-            html_parts.append(f'<div class="related-item">Synonyms: {", ".join(syns)}</div>')
-        if card.antonyms:
-            ants = [f"{a.word} ({a.translation})" for a in card.antonyms]
-            html_parts.append(f'<div class="related-item">Antonyms: {", ".join(ants)}</div>')
-        html_parts.append('</div>')
-            
-    html_parts.append('</div>') # end anki-card-content
-    return re.sub(r'\s+', ' ', "".join(html_parts)).strip()
+    html_parts.append('</div>')
+    return "".join(html_parts)
 
 def convert_to_anki(input_file: str, output_file: str):
     if not os.path.exists(input_file):

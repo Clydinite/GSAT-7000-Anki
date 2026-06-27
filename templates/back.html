@@ -11,6 +11,7 @@
 </div>
 <script>
 (function() {
+  // Blur effect handler
   const general = document.querySelector('.general-explanation');
   if (general) {
     general.classList.add('blur-reveal-container');
@@ -23,20 +24,29 @@
     };
     general.appendChild(overlay);
   }
+
+  // Unified shadcn accordion initializer
   const metaSections = document.querySelectorAll('.meta-section');
   metaSections.forEach((section) => {
     const trigger = document.createElement('button');
     trigger.className = 'accordion-trigger';
-    trigger.innerHTML = `<span>Reveal Translation & Notes</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+    
+    // Check if it's a generic thesaurus accordion or the primary meta section
+    const labelText = section.getAttribute('data-label') || "Reveal Translation & Notes";
+    
+    trigger.innerHTML = `<span>${labelText}</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
     section.classList.add('accordion-content');
+    
     trigger.onclick = (e) => {
       e.preventDefault();
-      trigger.classList.toggle('active');
+      const isExpanded = trigger.classList.toggle('active');
       section.classList.toggle('expanded');
     };
     section.parentNode.insertBefore(trigger, section);
   });
 })();
+
+// TTS Engine
 window.playTTS = function(text) {
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
