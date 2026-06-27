@@ -1,0 +1,52 @@
+<div class="card back-card">
+  <div class="header">
+    <span class="badge">Vocabulary</span>
+    <h1 class="headword">{{Front}}</h1>
+    <div style="display:none;">{{tts en_US:Front}}</div>
+  </div>
+  <hr class="separator">
+  <div class="content-area">
+    {{Back}}
+  </div>
+</div>
+<script>
+(function() {
+  const general = document.querySelector('.general-explanation');
+  if (general) {
+    general.classList.add('blur-reveal-container');
+    const overlay = document.createElement('div');
+    overlay.className = 'blur-overlay';
+    overlay.onclick = () => {
+      general.classList.add('revealed');
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.remove(), 400);
+    };
+    general.appendChild(overlay);
+  }
+  const metaSections = document.querySelectorAll('.meta-section');
+  metaSections.forEach((section) => {
+    const trigger = document.createElement('button');
+    trigger.className = 'accordion-trigger';
+    trigger.innerHTML = `<span>Reveal Translation & Notes</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+    section.classList.add('accordion-content');
+    trigger.onclick = (e) => {
+      e.preventDefault();
+      trigger.classList.toggle('active');
+      section.classList.toggle('expanded');
+    };
+    section.parentNode.insertBefore(trigger, section);
+  });
+})();
+window.playTTS = function(text) {
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = 0.9;
+  const voices = window.speechSynthesis.getVoices();
+  const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) 
+                      || voices.find(v => v.lang.startsWith('en'));
+  if (preferredVoice) utterance.voice = preferredVoice;
+  window.speechSynthesis.speak(utterance);
+};
+window.speechSynthesis.getVoices();
+</script>

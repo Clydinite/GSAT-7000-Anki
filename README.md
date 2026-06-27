@@ -6,12 +6,12 @@ The cards are currently under development. I would appreciate support on additio
 
 ## Card Status
 
-Currently I have completed the following cards:
+Currently I have completed the following cards (on this branch):
 
 - Level 1 - 0/1013
 - Level 2 - 0/1003
-- Level 3 - 1002/1002
-- Level 4 - 1002/1002
+- Level 3 - 0/1002
+- Level 4 - 0/1002
 - Level 5 - 0/1002
 - Level 6 - 0/1008
 
@@ -33,10 +33,11 @@ The remaining levels are yet to be generated. You can help by generating cards f
 
 1.  **Setup:** Clone the repo and install dependencies.
 2.  **API Key:** Change `.env.example` to `.env` and fill in your Gemini API key from [Google AI Studio](https://aistudio.google.com/api-keys).
-3.  **Configure:** Update the `level` variable in `process.py` and `to_anki.py` to the level you want to generate (e.g., `level = 5`).
-4.  **Process:** Run `python process.py` to generate the raw TSV files in `data/raw/` via the Gemini API.
+## How to Contribute
+... (as before) ...
 5.  **Export:** Run `python to_anki.py` to generate the Anki import file in `data/Anki/`.
-6.  **Submit:** Create a Pull Request on GitHub with the new files in `data/raw/` and `data/Anki/`.
+6.  **Preview:** Run `python templates/preview.py` to verify card styling locally before import.
+7.  **Submit:** Create a Pull Request on GitHub with the new files in `data/raw/` and `data/Anki/`.
 
 ## Data Source
 
