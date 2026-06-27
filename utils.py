@@ -112,9 +112,9 @@ Rules:
 Fields Guide:
 - headword: The base form of the word. Do not include any POS tags, parentheses, or suffix variations here (e.g., use "achieve", not "achieve (v.)" or "achieve(ment)").
 - explanation: A high-value usage note in Traditional Chinese focusing on syntax, common errors, or core conceptual metaphors. Avoid filler words or explicitly mentioning the acronym "GSAT".
-- senses: A list of core semantic clusters.
+- senses: A list of core semantic clusters. Please split the meanings into separate senses if they would not be considered related by a student. (not to linguists, but to GSAT students) 
 - entries: A list of distinct collocation patterns or phrases belonging to that specific sense.
-    - pattern: The specific grammatical structure or formula (e.g., "accuse sb. of sth.", "object to sth./doing sth.").
+    - pattern: The specific grammatical structure or formula (e.g., "accuse sb. of sth.", "object to sth./doing sth."). Please provide a significant amount of patterns to prepare the student for the test.
     - pos: The part of speech enum value matching the pattern ("phrase" should be used when the entry represents a multi-word idiom or fixed prepositional structure rather than a standalone word class).
     - explanation: A clear grammatical or contextual usage note in Traditional Chinese. Crucial: This field must remain plain text. Do not use Markdown styling (* or **) or XML tags (<target> or <pattern>) inside this specific field.
     - sentences: A list of example sentences matching the pattern.
