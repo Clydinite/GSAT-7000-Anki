@@ -12,16 +12,13 @@
   
   /* Accents */
   --accent-primary: #8b5cf6; 
-  --accent-primary-dim: rgba(139, 92, 246, 0.2);
-  --target-word: #c084fc; 
-  --collocation: #34d399; 
   
-  /* POS Badge Colors */
-  --pos-noun: #3b82f6; 
-  --pos-verb: #ef4444; 
-  --pos-adj: #f59e0b;  
-  --pos-adv: #10b981;  
-  --pos-phrase: #14b8a6; 
+  /* Modern POS Pallette */
+  --pos-noun: #fb923c;    /* Orange */
+  --pos-verb: #38bdf8;    /* Blue */
+  --pos-adj: #4ade80;     /* Green */
+  --pos-adv: #f472b6;     /* Pink */
+  --pos-phrase: #a1a1aa;  /* Secondary/Muted */
 }
 
 /* ==================
@@ -342,19 +339,19 @@ body {
 }
 
 .pos-badge {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
-  letter-spacing: 0.05em;
   color: #fff;
+  padding: 2px 4px;
+  border-radius: 4px;
 }
-.pos-noun { background: var(--pos-noun); }
-.pos-verb { background: var(--pos-verb); }
-.pos-adjective { background: var(--pos-adj); }
-.pos-adverb { background: var(--pos-adv); }
-.pos-phrase, .pos-idiom { background: var(--pos-phrase); }
+
+.pos-noun { color: var(--pos-noun); border-color: rgba(251, 146, 60, 0.2); background: rgba(251, 146, 60, 0.05); }
+.pos-verb { color: var(--pos-verb); border-color: rgba(56, 189, 248, 0.2); background: rgba(56, 189, 248, 0.05); }
+.pos-adjective { color: var(--pos-adj); border-color: rgba(74, 222, 128, 0.2); background: rgba(74, 222, 128, 0.05); }
+.pos-adverb { color: var(--pos-adv); border-color: rgba(244, 114, 182, 0.2); background: rgba(244, 114, 182, 0.05); }
+.pos-phrase, .pos-idiom { color: var(--pos-phrase); border-color: rgba(161, 161, 170, 0.2); background: rgba(161, 161, 170, 0.05); }
 
 .entry-pattern {
   font-size: 1.15rem;

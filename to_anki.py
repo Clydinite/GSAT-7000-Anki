@@ -72,7 +72,7 @@ def generate_html(card: Flashcard) -> str:
                     res.append(
                         f'<div class="relative-badge">'
                         f'<div class="rel-main">'
-                        f'<span class="rel-pos pos-{pos}">{pos[:3]}.</span>'
+                        f'<span class="rel-pos pos-{pos}">{pos}</span>'
                         f'<span class="rel-word">{html.escape(item.word)}</span>'
                         f'<span class="rel-trans">{html.escape(item.translation)}</span>'
                         f'</div>'
