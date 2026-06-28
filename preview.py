@@ -109,7 +109,8 @@ with open("templates/back.html", "r", encoding="utf-8") as f:
 card_html = generate_html(sample_card)
 final_back_html = back_html.replace("{{Back}}", card_html).replace("{{Front}}", sample_card.headword)
 
-html_content = generate_preview_html(card_html, css, final_back_html)
+# Directly use final_back_html as it already contains the full card structure
+html_content = generate_preview_html(css, final_back_html)
 
 with open("templates/preview.html", "w", encoding="utf-8") as f:
     f.write(html_content)

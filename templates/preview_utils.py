@@ -1,5 +1,5 @@
-def generate_preview_html(flashcard_content, css_content, back_html_content):
-    # This logic combines the card content, css and back.html structure
+def generate_preview_html(css_content, back_html_content):
+    # This structure expects back_html_content to be a complete card
     return f"""
 <!DOCTYPE html>
 <html>
@@ -7,7 +7,6 @@ def generate_preview_html(flashcard_content, css_content, back_html_content):
     <style>{css_content}</style>
 </head>
 <body>
-    <div class="card">{flashcard_content}</div>
     {back_html_content}
 </body>
 </html>
