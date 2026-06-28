@@ -146,9 +146,8 @@ body {
 /* Explanation inside dropdown */
 .general-explanation {
   background: var(--bg-alt);
-  border-left: 4px solid var(--accent-primary);
   padding: 16px;
-  border-radius: 6px 12px 12px 6px;
+  border-radius: 12px;
   font-size: 0.95rem;
   color: #e4e4e7;
   position: relative;
@@ -295,8 +294,8 @@ body {
 }
 
 .sense-idx {
-  background: var(--accent-primary);
-  color: #fff;
+  background: var(--bg-hover);
+  color: var(--text-primary);
   width: 26px;
   height: 26px;
   border-radius: 8px;
@@ -306,7 +305,6 @@ body {
   font-size: 0.9rem;
   font-weight: 700;
   flex-shrink: 0;
-  box-shadow: 0 2px 10px var(--accent-primary-dim);
 }
 
 .sense-title {
@@ -417,14 +415,17 @@ body {
 
 /* Dynamic Inline Highlights */
 .target-word {
-  color: var(--target-word);
+  color: #0d6dec;
+  background-color: #003cff10;
+  padding: 0 4px;
+  border-radius: 4px;
   font-weight: 700;
 }
 .collocation {
-  color: var(--collocation);
+  color: var(--text-primary);
   font-weight: 600;
   text-decoration: underline;
-  text-decoration-color: rgba(52, 211, 153, 0.3);
-  text-decoration-thickness: 2px;
+  text-decoration-color: var(--text-muted);
+  text-decoration-thickness: 1px;
   text-underline-offset: 4px;
 }
