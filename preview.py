@@ -1,5 +1,6 @@
 from utils import Flashcard
 from to_anki import generate_html
+from templates.preview_utils import generate_preview_html
 import os
 
 sample_card = Flashcard.model_validate(
@@ -99,14 +100,16 @@ sample_card = Flashcard.model_validate(
 with open("templates/card.css", "r", encoding="utf-8") as f:
     css = f.read()
 
-html_content = f"""
-<html>
-<head><style>{css}</style></head>
-<body>
-    <div class="card">{generate_html(sample_card)}</div>
-</body>
-</html>
-"""
+with open("templates/back.html", "r", encoding="utf-8") as f:
+    back_html = f.read()
+
+# Replace Anki mustache placeholders for preview
+# Note: The back_html uses {{Front}} and {{Back}}. 
+# For preview we should inject the card HTML into the 'Back' part
+card_html = generate_html(sample_card)
+final_back_html = back_html.replace("{{Back}}", card_html).replace("{{Front}}", sample_card.headword)
+
+html_content = generate_preview_html(card_html, css, final_back_html)
 
 with open("templates/preview.html", "w", encoding="utf-8") as f:
     f.write(html_content)
