@@ -61,29 +61,33 @@ def generate_html(card: Flashcard) -> str:
                 html_parts.append('</div>')
                 
             # Helper function for relative/synonym tags
-            def render_rel_list(title, items):
+            def render_word_pos_list(title, items):
                 if not items: return ""
                 res = ['<div class="meta-block">']
                 res.append(f'<div class="meta-block-title">{title}</div>')
                 res.append('<div class="relatives-group">')
                 for item in items:
                     pos = item.pos.value.lower()
+                    explanation_html = f'<div class="rel-explanation">{html.escape(item.explanation)}</div>' if item.explanation else ""
                     res.append(
                         f'<div class="relative-badge">'
+                        f'<div class="rel-main">'
                         f'<span class="rel-pos pos-{pos}">{pos[:3]}.</span>'
                         f'<span class="rel-word">{html.escape(item.word)}</span>'
                         f'<span class="rel-trans">{html.escape(item.translation)}</span>'
+                        f'</div>'
+                        f'{explanation_html}'
                         f'</div>'
                     )
                 res.append('</div></div>')
                 return "".join(res)
                 
             if card.relatives and card.relatives.related:
-                html_parts.append(render_rel_list("Related Words", card.relatives.related))
+                html_parts.append(render_word_pos_list("Related Words", card.relatives.related))
             if card.synonyms:
-                html_parts.append(render_rel_list("Synonyms", card.synonyms))
+                html_parts.append(render_word_pos_list("Synonyms", card.synonyms))
             if card.antonyms:
-                html_parts.append(render_rel_list("Antonyms", card.antonyms))
+                html_parts.append(render_word_pos_list("Antonyms", card.antonyms))
                 
             html_parts.append('</div>') # end meta-content-inner
             
