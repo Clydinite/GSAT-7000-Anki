@@ -223,7 +223,6 @@ body {
   display: flex;
   flex-direction: column;
   background: rgba(39, 39, 42, 0.6);
-  border: 1px solid var(--bg-hover);
   border-radius: 8px;
   padding: 10px 12px;
   gap: 6px;
