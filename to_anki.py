@@ -21,26 +21,45 @@ def strip_tags(text: str) -> str:
 
 import html
 
+def render_word_pos_list(title, items):
+    if not items: return ""
+    res = ['<div class="meta-block">']
+    res.append(f'<div class="meta-block-title">{title}</div>')
+    res.append('<div class="relatives-group">')
+    for item in items:
+        pos = item.pos.value.lower()
+        explanation_html = f'<div class="rel-explanation">{html.escape(item.explanation)}</div>' if item.explanation else ""
+        res.append(
+            f'<div class="relative-badge">'
+            f'<div class="rel-main">'
+            f'<span class="rel-pos pos-{pos}">{pos}</span>'
+            f'<span class="rel-word">{html.escape(item.word)}</span>'
+            f'<span class="rel-trans">{html.escape(item.translation)}</span>'
+            f'</div>'
+            f'{explanation_html}'
+            f'</div>'
+        )
+    res.append('</div></div>')
+    return "".join(res)
+
 def generate_html(card: Flashcard) -> str:
     html_parts = ['<div class="anki-card-content">']
     
-    # 1. Headword (Centered at the beginning)
+    # 1. Headword
     html_parts.append(f'<h1 class="card-headword">{html.escape(card.headword)}</h1>')
 
     # 2. Animated Dropdown Section (General Explanation & Meta Data)
-    has_meta = card.conjugations or (card.relatives and (card.relatives.morphology or card.relatives.related)) or card.synonyms or card.antonyms
+    # Check if we have any meta content left
+    has_meta = card.conjugations or (card.relatives and (card.relatives.morphology or card.relatives.related))
     
     if card.explanation or has_meta:
-        # The JS from your back.html targets `.meta-section` to insert the toggle button
         html_parts.append('<div class="meta-section" data-label="Word Origin, Details & Explanation">')
         html_parts.append('<div class="accordion-inner">') 
-        html_parts.append('<div class="accordion-inner-padding">') # Crucial for smooth CSS grid animation
+        html_parts.append('<div class="accordion-inner-padding">')
         
-        # 2a. General Explanation (Now inside the dropdown)
         if card.explanation:
             html_parts.append(f'<div class="general-explanation">{html.escape(card.explanation)}</div>')
             
-        # 2b. Meta Grids (Redesigned Section)
         if has_meta:
             html_parts.append('<div class="meta-content-inner">')
             
@@ -60,38 +79,14 @@ def generate_html(card: Flashcard) -> str:
                 html_parts.append(f'<div class="morphology-text">{html.escape(card.relatives.morphology)}</div>')
                 html_parts.append('</div>')
                 
-            # Global synonyms/antonyms (still in meta for now as legacy)
-            def render_word_pos_list(title, items):
-                if not items: return ""
-                res = ['<div class="meta-block">']
-                res.append(f'<div class="meta-block-title">{title}</div>')
-                res.append('<div class="relatives-group">')
-                for item in items:
-                    pos = item.pos.value.lower()
-                    explanation_html = f'<div class="rel-explanation">{html.escape(item.explanation)}</div>' if item.explanation else ""
-                    res.append(
-                        f'<div class="relative-badge">'
-                        f'<div class="rel-main">'
-                        f'<span class="rel-pos pos-{pos}">{pos}</span>'
-                        f'<span class="rel-word">{html.escape(item.word)}</span>'
-                        f'<span class="rel-trans">{html.escape(item.translation)}</span>'
-                        f'</div>'
-                        f'{explanation_html}'
-                        f'</div>'
-                    )
-                res.append('</div></div>')
-                return "".join(res)
-                
             if card.relatives and card.relatives.related:
                 html_parts.append(render_word_pos_list("Related Words", card.relatives.related))
                 
-            html_parts.append('</div>') # end meta-content-inner
+            html_parts.append('</div>')
             
-        html_parts.append('</div>') # end accordion-inner-padding
-        html_parts.append('</div>') # end accordion-inner
-        html_parts.append('</div>') # end meta-section
+        html_parts.append('</div></div></div>')
 
-    # 3. Core Senses (Remains Below)
+    # 3. Core Senses
     if card.senses:
         html_parts.append('<div class="senses-container">')
         for i, sense in enumerate(card.senses, 1):
@@ -102,7 +97,6 @@ def generate_html(card: Flashcard) -> str:
             for entry in sense.entries:
                 html_parts.append('<div class="entry-item">')
                 pos_class = f"pos-{entry.pos.value.lower()}"
-                
                 html_parts.append('<div class="entry-header">')
                 html_parts.append(f'<span class="pos-badge {pos_class}">{html.escape(entry.pos.value.lower())}</span>')
                 html_parts.append(f'<span class="entry-pattern">{html.escape(entry.pattern)}</span>')
@@ -112,7 +106,6 @@ def generate_html(card: Flashcard) -> str:
                 if entry.explanation:
                     html_parts.append(f'<div class="entry-explanation hideable">{html.escape(entry.explanation)}</div>')
                 
-                # --- NESTED SYN/ANT BLOCK ---
                 if entry.sentences:
                     html_parts.append('<div class="sentences">')
                     for s in entry.sentences:
@@ -121,12 +114,11 @@ def generate_html(card: Flashcard) -> str:
                         html_parts.append(f'<p class="sentence-zh hideable">{html.escape(s.translation)}</p>')
                         html_parts.append('</div>')
                     html_parts.append('</div>')
-                
                 html_parts.append('</div>') # end entry-item
             
-            # New Nested Section
+            # Nested Section: Synonyms & Antonyms
             if sense.synonyms or sense.antonyms:
-                html_parts.append('<div class="sense-meta-extras hideable">') # Added hideable here
+                html_parts.append('<div class="sense-meta-extras hideable">')
                 if sense.synonyms:
                     html_parts.append(render_word_pos_list("Synonyms", sense.synonyms))
                 if sense.antonyms:

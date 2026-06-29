@@ -322,9 +322,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-bottom: 1px dashed var(--bg-hover);
-  padding-bottom: 20px;
 }
+
 .entry-item:last-child {
   border-bottom: none;
   padding-bottom: 0;
@@ -446,4 +445,28 @@ body {
 
 .entry-explanation.hideable.expanded {
   padding: 10px 14px;
+}
+
+.sense-meta-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--bg-hover);
+}
+
+.sense-meta-extras.hideable {
+  display: block;
+  padding-top: 0px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out 0.2s, opacity 0.2s ease-out;
+}
+
+.sense-meta-extras.hideable.expanded {
+  opacity: 1;
+  padding-top: 10px;
+  max-height: 500px;
+  transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out 0.1s;
 }
