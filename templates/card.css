@@ -315,7 +315,7 @@ body {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .entry-item {
@@ -424,4 +424,13 @@ body {
   text-decoration-color: var(--text-muted);
   text-decoration-thickness: 1px;
   text-underline-offset: 4px;
+}
+
+/* Hide and Show */
+.hideable {
+  display: none;
+}
+
+.hideable.expanded {
+  display: block;
 }

@@ -100,7 +100,7 @@ def generate_html(card: Flashcard) -> str:
         html_parts.append('<div class="senses-container">')
         for i, sense in enumerate(card.senses, 1):
             html_parts.append('<div class="sense-group">')
-            html_parts.append(f'<div class="sense-heading"><span class="sense-idx">{i:02d}</span><h2 class="sense-title">{html.escape(sense.sense)}</h2></div>')
+            html_parts.append(f'<div class="sense-heading"><span class="sense-idx">{i:02d}</span><h2 class="sense-title hideable">{html.escape(sense.sense)}</h2></div>')
             
             html_parts.append('<div class="entry-list">')
             for entry in sense.entries:
@@ -110,18 +110,18 @@ def generate_html(card: Flashcard) -> str:
                 html_parts.append('<div class="entry-header">')
                 html_parts.append(f'<span class="pos-badge {pos_class}">{html.escape(entry.pos.value.lower())}</span>')
                 html_parts.append(f'<span class="entry-pattern">{html.escape(entry.pattern)}</span>')
-                html_parts.append(f'<span class="entry-translation">{html.escape(entry.translation)}</span>')
+                html_parts.append(f'<span class="entry-translation hideable">{html.escape(entry.translation)}</span>')
                 html_parts.append('</div>')
                 
                 if entry.explanation:
-                    html_parts.append(f'<div class="entry-explanation">{html.escape(entry.explanation)}</div>')
+                    html_parts.append(f'<div class="entry-explanation hideable">{html.escape(entry.explanation)}</div>')
                     
                 if entry.sentences:
                     html_parts.append('<div class="sentences">')
                     for s in entry.sentences:
                         html_parts.append('<div class="sentence">')
                         html_parts.append(f'<p class="sentence-en">{format_sentence(s.sentence)}</p>')
-                        html_parts.append(f'<p class="sentence-zh">{html.escape(s.translation)}</p>')
+                        html_parts.append(f'<p class="sentence-zh hideable">{html.escape(s.translation)}</p>')
                         html_parts.append('</div>')
                     html_parts.append('</div>')
                 
