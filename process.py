@@ -22,7 +22,7 @@ if not API_KEY:
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY"), 
     http_options={
-        "timeout": 180_000 # 3 minutes
+        "timeout": 300_000 # 5 minutes
     }
 )
 
