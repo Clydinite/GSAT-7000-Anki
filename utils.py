@@ -36,7 +36,7 @@ class Conjugations(BaseModel):
     past_participle: str = Field(..., description="Past participle")
     
 class Relatives(BaseModel):
-    morphology: str = Field(..., description="The morphology of the headword")
+    morphology: Optional[str] = Field(..., description="The morphology of the headword, null if monomorphemic, obscure, or that it's unhelpful to a student")
     related: List[WordPosTranslation]
 
 class Sentence(BaseModel):
@@ -428,6 +428,108 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                 "explanation": "字面意為在重點文字下方畫上一條線以示關鍵。"
                             }
                         ]
+                    }
+                }
+            )
+        ),
+        (
+            "remotely adv.",
+            Flashcard.model_validate(
+                {
+                    "headword": "remotely",
+                    "explanation": "「remotely」在學測中主要出現於兩種高頻語境：一是因應科技發展而形成的「遠端/線上」工作或學習描述；二是在否定句中作為加強語氣的修飾語，意思是「絲毫、根本」，是克漏字與精確閱讀的重要考點。",
+                    "senses": [
+                        {
+                            "sense": "遠端地；遙遠地（空間上的隔空操作）",
+                            "entries": [
+                                {
+                                    "pattern": "work / control remotely",
+                                    "pos": "phrase",
+                                    "translation": "遠端工作／遙控",
+                                    "explanation": "用來修飾動詞，指不需要親臨現場，而是透過網絡或技術進行操作。",
+                                    "sentences": [
+                                        {
+                                            "sentence": "Thanks to high-speed internet, engineering teams can now seamlessly cooperate and work <target>remotely</target> from different continents.",
+                                            "translation": "得益於高速網際網路，工程團隊現在可以跨越不同的洲別進行無縫合作並遠端工作。"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "synonyms": [
+                                {"word": "distantly", "pos": "adverb", "translation": "遙遠地", "explanation": "單純強調空間上距離遙遠"}
+                            ],
+                            "antonyms": [
+                                {"word": "locally", "pos": "adverb", "translation": "在地地；現本地", "explanation": "指在當前、當地的現場"}
+                            ]
+                        },
+                        {
+                            "sense": "絲毫；根本（用於否定句，加強否定語氣）",
+                            "entries": [
+                                {
+                                    "pattern": "not remotely interested / similar",
+                                    "pos": "phrase",
+                                    "translation": "絲毫無興趣／根本不相似",
+                                    "explanation": "常用於搭配形容詞，形成強烈的否定對比，語氣等同於 not at all 或 not in the least。",
+                                    "sentences": [
+                                        {
+                                            "sentence": "The two movies share a similar historical setting, but their plots are <pattern>not</pattern> <target>remotely</target> <pattern>similar</pattern> to each other.",
+                                            "translation": "這兩部電影雖然共享了相似的歷史背景，但它們的劇情彼此之間根本不相似。"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "synonyms": [
+                                {"word": "at all", "pos": "phrase", "translation": "根本；絲毫", "explanation": "最普遍常用的否定強調片語"}
+                            ],
+                            "antonyms": []
+                        }
+                    ],
+                    "conjugations": None,
+                    "relatives": {
+                        "morphology": "形容詞 remote 加上副詞字尾 -ly",
+                        "related": [
+                            {
+                                "word": "remote",
+                                "pos": "adjective",
+                                "translation": "遙遠的；偏僻的",
+                                "explanation": "核心基礎形容詞型態。"
+                            }
+                        ]
+                    }
+                }
+        )
+        ),
+        (
+            "caterpillar n.",
+            Flashcard.model_validate(
+                {
+                    "headword": "caterpillar",
+                    "explanation": "「caterpillar」在生物、自然生態類閱讀測驗中是基礎核心名詞。",
+                    "senses": [
+                        {
+                            "sense": "毛毛蟲；蝶蛾的幼蟲",
+                            "entries": [
+                                {
+                                    "pattern": "caterpillar",
+                                    "pos": "noun",
+                                    "translation": "毛茸茸的毛毛蟲",
+                                    "explanation": "常用形容詞修飾其外觀特徵，出現在自然生態描寫中。",
+                                    "sentences": [
+                                        {
+                                            "sentence": "The children observed a bright green <target>caterpillar</target> slowly crawling across the surface of a large oak leaf.",
+                                            "translation": "孩子們觀察到一隻鮮綠色的毛毛蟲正緩慢地在一張大橡樹葉的表面上爬行。"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "synonyms": [],
+                            "antonyms": []
+                        }
+                    ],
+                    "conjugations": None,
+                    "relatives": {
+                        "morphology": None,
+                        "related": []
                     }
                 }
             )
