@@ -60,7 +60,7 @@ def generate_html(card: Flashcard) -> str:
                 html_parts.append(f'<div class="morphology-text">{html.escape(card.relatives.morphology)}</div>')
                 html_parts.append('</div>')
                 
-            # Helper function for relative/synonym tags
+            # Global synonyms/antonyms (still in meta for now as legacy)
             def render_word_pos_list(title, items):
                 if not items: return ""
                 res = ['<div class="meta-block">']
@@ -84,10 +84,6 @@ def generate_html(card: Flashcard) -> str:
                 
             if card.relatives and card.relatives.related:
                 html_parts.append(render_word_pos_list("Related Words", card.relatives.related))
-            if card.synonyms:
-                html_parts.append(render_word_pos_list("Synonyms", card.synonyms))
-            if card.antonyms:
-                html_parts.append(render_word_pos_list("Antonyms", card.antonyms))
                 
             html_parts.append('</div>') # end meta-content-inner
             
@@ -115,7 +111,8 @@ def generate_html(card: Flashcard) -> str:
                 
                 if entry.explanation:
                     html_parts.append(f'<div class="entry-explanation hideable">{html.escape(entry.explanation)}</div>')
-                    
+                
+                # --- NESTED SYN/ANT BLOCK ---
                 if entry.sentences:
                     html_parts.append('<div class="sentences">')
                     for s in entry.sentences:
@@ -126,6 +123,16 @@ def generate_html(card: Flashcard) -> str:
                     html_parts.append('</div>')
                 
                 html_parts.append('</div>') # end entry-item
+            
+            # New Nested Section
+            if sense.synonyms or sense.antonyms:
+                html_parts.append('<div class="sense-meta-extras hideable">') # Added hideable here
+                if sense.synonyms:
+                    html_parts.append(render_word_pos_list("Synonyms", sense.synonyms))
+                if sense.antonyms:
+                    html_parts.append(render_word_pos_list("Antonyms", sense.antonyms))
+                html_parts.append('</div>')
+            
             html_parts.append('</div>') # end entry-list
             html_parts.append('</div>') # end sense-group
         html_parts.append('</div>') # end senses-container

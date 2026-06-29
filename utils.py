@@ -53,6 +53,8 @@ class Entry(BaseModel):
 class Sense(BaseModel):
     sense: str = Field(..., description="Core meaning in Traditional Chinese")
     entries: List[Entry]
+    synonyms: List[WordPosTranslation] = Field(default_factory=list)
+    antonyms: List[WordPosTranslation] = Field(default_factory=list)
 
 class Flashcard(BaseModel):
     headword: str = Field(..., description="Headword")
@@ -60,8 +62,6 @@ class Flashcard(BaseModel):
     senses: List[Sense]
     conjugations: Optional[Conjugations]
     relatives: Relatives = Field(..., description="Word families")
-    synonyms: List[WordPosTranslation] = Field(default_factory=list)
-    antonyms: List[WordPosTranslation] = Field(default_factory=list)
     
 class BatchFlashcard(BaseModel):
     results: List[Flashcard]
