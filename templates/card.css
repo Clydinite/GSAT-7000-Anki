@@ -428,9 +428,22 @@ body {
 
 /* Hide and Show */
 .hideable {
-  display: none;
+  display: block;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.3s ease-out, max-height 0.3s ease-out;
+}
+
+.entry-explanation.hideable {
+  padding: 0;
 }
 
 .hideable.expanded {
-  display: block;
+  opacity: 1;
+  max-height: 500px; /* Sufficiently large for content */
+}
+
+.entry-explanation.hideable.expanded {
+  padding: 10px 14px;
 }
