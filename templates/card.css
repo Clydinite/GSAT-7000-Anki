@@ -115,7 +115,7 @@ body {
 }
 .accordion-trigger.active .chevron {
   transform: rotate(180deg);
-  color: var(--accent-primary);
+  color: var(--text-primary);
 }
 
 /* The Magic Grid Animation */
