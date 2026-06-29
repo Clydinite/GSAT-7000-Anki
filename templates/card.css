@@ -315,13 +315,12 @@ body {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 .entry-item {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
 .entry-item:last-child {
@@ -334,6 +333,7 @@ body {
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
+  margin-bottom: 10px;
 }
 
 .pos-badge {
@@ -376,7 +376,7 @@ body {
 .sentences {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   margin-top: 4px;
 }
 
@@ -445,6 +445,7 @@ body {
 
 .entry-explanation.hideable.expanded {
   padding: 10px 14px;
+  margin-bottom: 10px;
 }
 
 .sense-meta-extras {
@@ -457,7 +458,7 @@ body {
 
 .sense-meta-extras.hideable {
   display: block;
-  padding-top: 0px;
+  margin-top: -30px; /* Hack */
   opacity: 0;
   max-height: 0;
   overflow: hidden;
@@ -465,8 +466,9 @@ body {
 }
 
 .sense-meta-extras.hideable.expanded {
+  display: flex;
   opacity: 1;
-  padding-top: 10px;
+  margin-top: 0px;
   max-height: 500px;
   transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out 0.1s;
 }
