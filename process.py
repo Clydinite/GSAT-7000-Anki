@@ -4,6 +4,7 @@
 import asyncio
 import os
 import csv
+import time
 from typing import List, Tuple, Optional
 from google import genai
 from google.genai import types
@@ -69,6 +70,7 @@ def get_processed_words(output_file: str) -> set[str]:
 
 # Added file_lock, chunk_idx, and total_chunks parameters for clean output visibility
 async def process_chunk(client, chunk: List[str], human_examples: List[Tuple[str, Flashcard]], file_lock: asyncio.Lock, chunk_idx: int, total_chunks: int):
+    print(f"Processing chunk {chunk_idx} of {total_chunks}...")
     success = False
     attempts = 0
     while not success:
@@ -105,7 +107,7 @@ async def main():
             fieldnames = reader.fieldnames
             rows = [r for r in reader if r.get("verification") == "human"]
         with open(output_file, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
+            writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t") # type: ignore
             writer.writeheader()
             writer.writerows(rows)
 
@@ -113,8 +115,8 @@ async def main():
     words_to_process = [w for w in word_list if w not in processed_words]
     print(f"Processing {len(words_to_process)} words.")
 
-    chunk_size = 5
-    workers = 2
+    chunk_size = 1
+    workers = 5
     chunks = [words_to_process[i : i + chunk_size] for i in range(0, len(words_to_process), chunk_size)]
     total_chunks = len(chunks)
     human_examples = get_few_shots()
@@ -131,7 +133,7 @@ async def main():
         
         # Process in batches to avoid overwhelming the API
         for i in range(0, len(tasks), workers):
-            batch = tasks[i : i + 2]
+            batch = tasks[i : i + workers]
             await asyncio.gather(*batch)
             await asyncio.sleep(2)
 
