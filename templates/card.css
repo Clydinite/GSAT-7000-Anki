@@ -34,6 +34,14 @@ body {
   line-height: 1.5;
 }
 
+/* preflight */
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    line-height: inherit;
+}
+
 .card {
   background-color: var(--bg-card);
   border-radius: 16px;
@@ -331,9 +339,15 @@ body {
 .entry-header {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
   margin-bottom: 10px;
+  width: 100%;
+  overflow-x: scroll;
+}
+
+.entry-header > span {
+  flex-shrink: 0; 
 }
 
 .pos-badge {
