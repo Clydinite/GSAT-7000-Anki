@@ -68,9 +68,11 @@ def get_processed_words(output_file: str) -> set[str]:
                     processed.add(row["raw_string"])
     return processed
 
-# Added file_lock, chunk_idx, and total_chunks parameters for clean output visibility
 async def process_chunk(client, chunk: List[str], human_examples: List[Tuple[str, Flashcard]], file_lock: asyncio.Lock, chunk_idx: int, total_chunks: int):
-    print(f"Processing chunk {chunk_idx} of {total_chunks}...")
+    timestamp = time.strftime("%H:%M:%S")
+    print(f"[{timestamp}] Processing chunk {chunk_idx} of {total_chunks}...")
+    start_time = time.perf_counter()
+    
     success = False
     attempts = 0
     while not success:
@@ -83,7 +85,9 @@ async def process_chunk(client, chunk: List[str], human_examples: List[Tuple[str
             async with file_lock:
                 await asyncio.to_thread(append_to_raw_tsv, level, chunk, batch_results)
             
-            print(f"Successfully processed chunk {chunk_idx} of {total_chunks}.")
+            elapsed = time.perf_counter() - start_time
+            timestamp = time.strftime("%H:%M:%S")
+            print(f"[{timestamp}] Successfully processed chunk {chunk_idx} of {total_chunks} in {elapsed:.2f}s.")
             success = True
         except (APIError, Exception) as e:
             attempts += 1
@@ -92,6 +96,12 @@ async def process_chunk(client, chunk: List[str], human_examples: List[Tuple[str
                 break
             print(f"    Error at chunk {chunk_idx} (attempt {attempts}): {e}")
             await asyncio.sleep(12)  # Generous padding to clear server bottleneck queues
+
+# Worker wrapper that executes within a controlled concurrency slot
+async def worker_pool_slot(semaphore: asyncio.Semaphore, client, chunk: List[str], human_examples: List[Tuple[str, Flashcard]], file_lock: asyncio.Lock, chunk_idx: int, total_chunks: int):
+    """Acquires a slot from the semaphore to guarantee exactly 5 tasks run concurrently."""
+    async with semaphore:
+        await process_chunk(client, chunk, human_examples, file_lock, chunk_idx, total_chunks)
 
 async def main():
     if not os.path.exists(f"{origin}/level{level}.txt"):
@@ -121,21 +131,30 @@ async def main():
     total_chunks = len(chunks)
     human_examples = get_few_shots()
     
-    # Initialize a shared lock to completely insulate your TSV file
+    # Primitives to synchronize your tasks safely
     file_lock = asyncio.Lock()
+    pool_semaphore = asyncio.Semaphore(workers) # Limits total concurrency to exactly 5 slots
     
     # Use the async client context manager
     async with genai.Client(api_key=API_KEY, http_options=types.HttpOptions(timeout=300_000)).aio as aclient:
         tasks = []
         for idx, chunk in enumerate(chunks):
-            # Pass metrics down to the handler functions
-            tasks.append(process_chunk(aclient, chunk, human_examples, file_lock, idx + 1, total_chunks))
+            # Wrap each task in our semaphore slot coordinator
+            task = worker_pool_slot(
+                pool_semaphore, 
+                aclient, 
+                chunk, 
+                human_examples, 
+                file_lock, 
+                idx + 1, 
+                total_chunks
+            )
+            tasks.append(task)
         
-        # Process in batches to avoid overwhelming the API
-        for i in range(0, len(tasks), workers):
-            batch = tasks[i : i + workers]
-            await asyncio.gather(*batch)
-            await asyncio.sleep(2)
+        # Fire all tasks into the event loop concurrently. 
+        # The semaphore restricts execution so that only 5 operate simultaneously.
+        # As soon as one ends, the next task in line picks up instantly.
+        await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
     asyncio.run(main())
