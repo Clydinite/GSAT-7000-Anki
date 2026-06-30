@@ -23,7 +23,6 @@ class PartOfSpeech(str, Enum):
     CONJUNCTION = "conjunction"
     INTERJECTION = "interjection"
     DETERMINER = "determiner"
-    PHRASE = "phrase"
 
 class WordPosTranslation(BaseModel):
     word: str = Field(..., description="Word")
@@ -44,7 +43,7 @@ class Sentence(BaseModel):
     translation: str = Field(..., description="Traditional Chinese translation")
 
 class Entry(BaseModel):
-    pattern: str = Field(..., description="Collocation pattern, can be the word itself or a phrase (e.g. to accuse sb. of sth.)")
+    pattern: str = Field(..., description="Collocation pattern, can be the word on its own (e.g. catepillar) or a common usage pattern (e.g. to accuse sb. of sth.)")
     pos: PartOfSpeech = Field(..., description="Part of speech")
     translation: str = Field(..., description="Traditional Chinese translation")
     explanation: Optional[str] = Field(None, description="Usage/Grammar note in Traditional Chinese")
@@ -115,7 +114,7 @@ Fields Guide:
 - senses: A list of core semantic clusters. Please split the meanings into separate senses if they would not be considered related by a student. (not to linguists, but to GSAT students) 
 - entries: A list of distinct collocation patterns or phrases belonging to that specific sense.
     - pattern: The specific grammatical structure or formula (e.g., "accuse sb. of sth.", "object to sth./doing sth."). Please provide a significant amount of patterns to prepare the student for the test.
-    - pos: The part of speech enum value matching the pattern ("phrase" should be used when the entry represents a multi-word idiom or fixed prepositional structure rather than a standalone word class).
+    - pos: The part of speech enum value matching the pattern.
     - explanation: A clear grammatical or contextual usage note in Traditional Chinese. Crucial: This field must remain plain text. Do not use Markdown styling (* or **) or XML tags (<target> or <pattern>) inside this specific field.
     - sentences: A list of example sentences matching the pattern.
         - Text Marking Rules: 
@@ -160,7 +159,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                 },
                                 {
                                     "pattern": "predict that...",
-                                    "pos": "phrase",
+                                    "pos": "verb",
                                     "translation": "預測…（後接子句）",
                                     "explanation": "動詞後接名詞子句，用來交代一整串複雜的趨勢演變，在寫作論述中極為高頻。",
                                     "sentences": [
@@ -217,7 +216,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
             Flashcard.model_validate(
                 {
                     "headword": "object",
-                    "explanation": "「object」在學測中為核心必考字彙。由於名詞與動詞的語意、用法截然不同，且名詞本身又包含具體的「物理實體」與抽象的「行動目標」，這三種語意在學生的直覺中很難串聯在一起，因此將它們拆分為三個獨立的語意區塊，以便於精準記憶與複習。",
+                    "explanation": "「object」在學測中為核心必考字彙。名詞與動詞的語意、用法截然不同。名詞包含具體的「物理實體」與抽象的「行動目標/情感對象」，動詞則主要為「反對」。將其拆分為三大獨立語意區塊以利高效率、原子化記憶。",
                     "senses": [
                         {
                             "sense": "物體；物品（物理上可見或存在的實體）",
@@ -230,20 +229,12 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                     "sentences": [
                                         {
                                             "sentence": "When the lights went out, I stumbled in the pitch-black room and my foot struck a heavy, metallic <target>object</target> left on the floor.",
-                                            "translation": "當燈火熄滅時，我在漆黑的房間裡跌跌撞撞，腳踢到了遺留在地板上的一個沉重金屬物體。"
+                                            "translation": "當燈火熄滅時，我在漆黑的房間裡跌顛撞撞，腳踢到了遺留在地板上的一個沉重金屬物體。"
                                         },
                                         {
                                             "sentence": "Archaeologists digging in the desert found ancient everyday <target>objects</target> like clay pots and iron knives, revealing how people lived centuries ago.",
                                             "translation": "考古學家在沙漠中挖掘時，發現了陶罐和鐵刀等古老的日常物品，揭示了幾個世紀前人們的生活方式。"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pattern": "a physical object",
-                                    "pos": "phrase",
-                                    "translation": "有形物體；物理實體",
-                                    "explanation": "寫作時強調具體存在、佔有空間的實物，常與抽象概念做對比。",
-                                    "sentences": [
+                                        },
                                         {
                                             "sentence": "Ghosts are just imaginary figures in scary stories; they do not have a solid, physical <target>object</target> that you can actually touch or hold.",
                                             "translation": "鬼魂只是恐怖故事中虛構的人物；它們並沒有一個你實際上可以觸摸或握住的堅固、有形物體。"
@@ -252,19 +243,19 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                 }
                             ],
                             "synonyms": [
-                                {"word": "item", "pos": "noun", "translation": "物件；項目", "explanation": "指個別的物品實體"},
-                                {"word": "article", "pos": "noun", "translation": "物品；一件商品", "explanation": "常用於特定類別的物品"}
+                                { "word": "item", "pos": "noun", "translation": "物件", "explanation": "指個別的物品實體" },
+                                { "word": "article", "pos": "noun", "translation": "物品", "explanation": "常用於特定類別的物品" }
                             ],
                             "antonyms": []
                         },
                         {
-                            "sense": "目標；目的（行動或企圖的核心意圖）",
+                            "sense": "目標；對象（行動的核心意圖，或情感投射的目標）",
                             "entries": [
                                 {
                                     "pattern": "the object of sth.",
-                                    "pos": "phrase",
+                                    "pos": "noun",
                                     "translation": "…的目的、目標",
-                                    "explanation": "等同於 purpose 或 aim。在寫作中用來明確表明某項行動的核心目的。",
+                                    "explanation": "等同於 purpose 或 aim。在句中常作主詞或主要名詞片語，用以明確表明某項行動的核心目的。",
                                     "sentences": [
                                         {
                                             "sentence": "The ultimate <target>object</target> <pattern>of</pattern> his grueling four-year medical training was finally realized when he opened his own clinic.",
@@ -273,6 +264,22 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                         {
                                             "sentence": "With the sole <target>object</target> <pattern>of</pattern> saving the company from bankruptcy, the boss decided to cut budgets and lay off half of the staff.",
                                             "translation": "純粹為了（以…為唯一目標）挽救公司免於破產，老闆決定縮減預算並解雇一半的員工。"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "pattern": "an object of affection/desire/pity",
+                                    "pos": "noun",
+                                    "translation": "（某種情感或行為的）對象、目標",
+                                    "explanation": "指成為他人特定情感（如喜愛、渴望、憐憫、嘲笑）投射的核心對象。為大考常見的高階固定搭配句型。",
+                                    "sentences": [
+                                        {
+                                            "sentence": "For years, the young actress was the <target>object</target> <pattern>of</pattern> intense public affection and media attention.",
+                                            "translation": "多年來，這位年輕的女演員一直是公眾強烈喜愛和媒體關注的對象。"
+                                        },
+                                        {
+                                            "sentence": "No one wants to be the <target>object</target> <pattern>of</pattern> pity; people want to be respected for their abilities.",
+                                            "translation": "沒有人想成為被憐憫的對象；人們希望自己的能力受到尊重。"
                                         }
                                     ]
                                 }
@@ -289,7 +296,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                             "entries": [
                                 {
                                     "pattern": "object to sth./doing sth.",
-                                    "pos": "phrase",
+                                    "pos": "verb",
                                     "translation": "反對某事／反對做某事",
                                     "explanation": "這裡的 to 是介系詞，因此後面如果接動詞，必須使用動名詞 (V-ing) 或直接接名詞。此語意與用法為學測片語大熱門。",
                                     "sentences": [
@@ -305,13 +312,13 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                 },
                                 {
                                     "pattern": "object that...",
-                                    "pos": "phrase",
-                                    "translation": "反對說…；提出異議認為…",
+                                    "pos": "verb",
+                                    "translation": "提出異議認為…；反對說…",
                                     "explanation": "後接名詞子句（that 子句），用來具體敘述反對的理由或論點，多用於閱讀測驗中的論辯語境。",
                                     "sentences": [
                                         {
                                             "sentence": "While the mayor claimed the tax increase was necessary, angry citizens <target>objected</target> <pattern>that</pattern> it would unfairly hurt poor families who were already struggling.",
-                                            "translation": "儘管市長聲聲句句稱加稅是必要的，但憤怒的市民提出異議認為，這將會不公平地傷害那些已經在苦苦掙扎的貧困家庭。"
+                                            "translation": "儘管市長聲稱加稅是必要的，許多憤怒的市民提出異議認為，這將會不公平地傷害那些已經在苦苦掙扎的貧困家庭。"
                                         }
                                     ]
                                 }
@@ -321,8 +328,8 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                 {"word": "protest", "pos": "verb", "translation": "抗議；反對", "explanation": "強調公開表達不滿與抗議"}
                             ],
                             "antonyms": [
-                                {"word": "approve", "pos": "verb", "translation": "贊成；批准", "explanation": "指官方或口頭上的認可"},
-                                {"word": "consent", "pos": "verb", "translation": "同意；答應", "explanation": "常搭配介系詞 consent to"}
+                                { "word": "approve", "pos": "verb", "translation": "贊成" },
+                                { "word": "consent", "pos": "verb", "translation": "同意", "explanation": "常搭配介系詞 consent to" }
                             ]
                         }
                     ],
@@ -333,24 +340,11 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                     "relatives": {
                         "morphology": "字首 ob- (反對、朝向) 與字根 ject (投擲、射)",
                         "related": [
-                            {
-                                "word": "objection",
-                                "pos": "noun",
-                                "translation": "反對；異議",
-                                "explanation": "由動詞 object 加上名詞字尾 -tion 延伸而來。"
-                            },
-                            {
-                                "word": "objective",
-                                "pos": "adjective",
-                                "translation": "客觀的",
-                                "explanation": "字面指像對待客觀物體一樣不夾帶個人情感，與主觀對立。"
-                            },
-                            {
-                                "word": "reject",
-                                "pos": "verb",
-                                "translation": "拒絕；排斥",
-                                "explanation": "字根組合：re- (向後) + ject (投擲)，意為往回扔、不要。"
-                            }
+                            { "word": "objection", "pos": "noun", "translation": "反對；異議", "explanation": "由動詞 object 加上名詞字尾 -tion 延伸而來。" },
+                            { "word": "objective", "pos": "adjective", "translation": "客觀的", "explanation": "字面指像對待客觀物體一樣不夾帶個人情感，與主觀對立。" },
+                            { "word": "objective", "pos": "noun", "translation": "目標；目的", "explanation": "等同於名詞 object 的抽象意圖語意。" },
+                            { "word": "reject", "pos": "verb", "translation": "拒絕；排斥", "explanation": "字根組合：re- (向後) + ject (投擲)，意為往回扔、不要。" },
+                            { "word": "project", "pos": "verb", "translation": "投射；預測", "explanation": "字根組合：pro- (向前) + ject (投擲)，意為往前扔出光線或想法。" }
                         ]
                     }
                 }
@@ -368,7 +362,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                             "entries": [
                                 {
                                     "pattern": "undergo a change / transformation",
-                                    "pos": "phrase",
+                                    "pos": "verb",
                                     "translation": "經歷轉變／變革",
                                     "explanation": "常用於描述社會、城市、產業系統的大幅演變與進化歷史。",
                                     "sentences": [
@@ -384,7 +378,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                 },
                                 {
                                     "pattern": "undergo surgery / treatment",
-                                    "pos": "phrase",
+                                    "pos": "verb",
                                     "translation": "接受手術／治療",
                                     "explanation": "醫療情境的強搭配。注意英文中病患做主詞時用主動態的 undergo 表示「經歷」，而非被動態。",
                                     "sentences": [
@@ -413,7 +407,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                         "past_participle": "undergone"
                     },
                     "relatives": {
-                        "morphology": "字首 under- (在…之下) 與核心動詞 go",
+                        "morphology": "字首 under- (在…之下) 與動詞 go",
                         "related": [
                             {
                                 "word": "undertake",
@@ -436,67 +430,72 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
             "remotely adv.",
             Flashcard.model_validate(
                 {
-                    "headword": "remotely",
-                    "explanation": "「remotely」在學測中主要出現於兩種高頻語境：一是因應科技發展而形成的「遠端/線上」工作或學習描述；二是在否定句中作為加強語氣的修飾語，意思是「絲毫、根本」，是克漏字與精確閱讀的重要考點。",
-                    "senses": [
-                        {
-                            "sense": "遠端地；遙遠地（空間上的隔空操作）",
-                            "entries": [
-                                {
-                                    "pattern": "work / control remotely",
-                                    "pos": "phrase",
-                                    "translation": "遠端工作／遙控",
-                                    "explanation": "用來修飾動詞，指不需要親臨現場，而是透過網絡或技術進行操作。",
-                                    "sentences": [
-                                        {
-                                            "sentence": "Thanks to high-speed internet, engineering teams can now seamlessly cooperate and work <target>remotely</target> from different continents.",
-                                            "translation": "得益於高速網際網路，工程團隊現在可以跨越不同的洲別進行無縫合作並遠端工作。"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "synonyms": [
-                                {"word": "distantly", "pos": "adverb", "translation": "遙遠地", "explanation": "單純強調空間上距離遙遠"}
-                            ],
-                            "antonyms": [
-                                {"word": "locally", "pos": "adverb", "translation": "在地地；現本地", "explanation": "指在當前、當地的現場"}
-                            ]
-                        },
-                        {
-                            "sense": "絲毫；根本（用於否定句，加強否定語氣）",
-                            "entries": [
-                                {
-                                    "pattern": "not remotely interested / similar",
-                                    "pos": "phrase",
-                                    "translation": "絲毫無興趣／根本不相似",
-                                    "explanation": "常用於搭配形容詞，形成強烈的否定對比，語氣等同於 not at all 或 not in the least。",
-                                    "sentences": [
-                                        {
-                                            "sentence": "The two movies share a similar historical setting, but their plots are <pattern>not</pattern> <target>remotely</target> <pattern>similar</pattern> to each other.",
-                                            "translation": "這兩部電影雖然共享了相似的歷史背景，但它們的劇情彼此之間根本不相似。"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "synonyms": [
-                                {"word": "at all", "pos": "phrase", "translation": "根本；絲毫", "explanation": "最普遍常用的否定強調片語"}
-                            ],
-                            "antonyms": []
-                        }
-                    ],
-                    "conjugations": None,
-                    "relatives": {
-                        "morphology": "形容詞 remote 加上副詞字尾 -ly",
-                        "related": [
+                "headword": "remotely",
+                "explanation": "「remotely」在學測中主要出現於兩種高頻語境：一是因應科技發展而形成的「遠端/線上」工作或學習描述；二是在否定句中作為加強語氣的修飾語，意思是「絲毫、根本」，是克漏字與精確閱讀的重要考點。",
+                "senses": [
+                    {
+                        "sense": "遠端地；遙遠地（空間上的隔空操作）",
+                        "entries": [
                             {
-                                "word": "remote",
-                                "pos": "adjective",
-                                "translation": "遙遠的；偏僻的",
-                                "explanation": "核心基礎形容詞型態。"
+                                "pattern": "work / control remotely",
+                                "pos": "adverb",
+                                "translation": "遠端工作／遙控",
+                                "explanation": "用來修飾動詞，指不需要親臨現場，而是透過網絡或技術進行操作。",
+                                "sentences": [
+                                    {
+                                        "sentence": "Thanks to high-speed internet, engineering teams can now seamlessly cooperate and work <target>remotely</target> from different continents.",
+                                        "translation": "得益於高速網際網路，工程團隊現在可以跨越不同的洲別進行無縫合作並遠端工作。"
+                                    }
+                                ]
                             }
+                        ],
+                        "synonyms": [
+                            {"word": "distantly", "pos": "adverb", "translation": "遙遠地", "explanation": "單純強調空間上距離遙遠"}
+                        ],
+                        "antonyms": [
+                            {"word": "locally", "pos": "adverb", "translation": "在地地；現本地", "explanation": "指在當前、當地的現場"}
                         ]
+                    },
+                    {
+                        "sense": "絲毫；根本（用於否定句，加強否定語氣）",
+                        "entries": [
+                            {
+                                "pattern": "not remotely adj.",
+                                "pos": "adverb",
+                                "translation": "絲毫（不）…；根本（不）…",
+                                "explanation": "常用於搭配形容詞，形成強烈的否定對比，語氣等同於 not at all 或 not in the least。",
+                                "sentences": [
+                                    {
+                                        "sentence": "The two movies share a similar historical setting, but their plots are <pattern>not</pattern> <target>remotely</target> <pattern>similar</pattern> to each other.",
+                                        "translation": "這兩部電影雖然共享了相似的歷史背景，但它們的劇情彼此之間根本不相似。"
+                                    },
+                                    {
+                                        "sentence": "Without the generous funding provided by the anonymous donor, expanding the local orphanage was <pattern>not</pattern> <target>remotely</target> <pattern>possible</pattern>.",
+                                        "translation": "若沒有匿名捐款人提供的慷慨資助，擴建當地孤兒院是絲毫不可能的事。"
+                                    }
+                                ]
+                            }
+                        ],
+                        "synonyms": [
+                            {"word": "at all", "pos": "adverb", "translation": "根本；絲毫", "explanation": "最普遍常用的否定強調詞組（作副詞功能）"},
+                            {"word": "whatsoever", "pos": "adverb", "translation": "絲毫；任何", "explanation": "常用於名詞或否定詞後作強烈強調"}
+                        ],
+                        "antonyms": []
                     }
+                ],
+                "conjugations": None,
+                "relatives": {
+                    "morphology": "形容詞 remote 加上副詞字尾 -ly",
+                    "related": [
+                        {
+                            "word": "remote",
+                            "pos": "adjective",
+                            "translation": "遙遠的；偏僻的",
+                            "explanation": "核心基礎形容詞型態。"
+                        },
+                    ]
                 }
+            }
         )
         ),
         (
@@ -507,12 +506,12 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                     "explanation": "「caterpillar」在生物、自然生態類閱讀測驗中是基礎核心名詞。",
                     "senses": [
                         {
-                            "sense": "毛毛蟲；蝶蛾的幼蟲",
+                            "sense": "毛毛蟲",
                             "entries": [
                                 {
                                     "pattern": "caterpillar",
                                     "pos": "noun",
-                                    "translation": "毛茸茸的毛毛蟲",
+                                    "translation": "毛毛蟲",
                                     "explanation": "常用形容詞修飾其外觀特徵，出現在自然生態描寫中。",
                                     "sentences": [
                                         {
