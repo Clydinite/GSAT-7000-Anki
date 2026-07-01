@@ -135,7 +135,7 @@ async def main_async() -> None:
     args = parser.parse_args()
     
     edit_level = args.level
-    batch_size = 3
+    batch_size = 1
     workers = 5  # Keeps exactly 5 parallel workers processing slots
 
     file_path = f"data/raw/level{edit_level}.tsv"
@@ -165,7 +165,7 @@ async def main_async() -> None:
         print("No cards need fixing.")
         return
 
-    print(f"Fixing {total_pending} cards in fluid batches of {batch_size} for Level {edit_level}...")
+    print(f"Fixing {total_pending} cards in batches of {batch_size} for Level {edit_level}...")
 
     # Initialize task structures and execution locks
     counter_dict = {"updated_count": 0}
