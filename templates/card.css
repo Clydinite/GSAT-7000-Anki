@@ -109,6 +109,9 @@ button, input, select, textarea {
    Animated Dropdown & Trigger
    ================== */
 .accordion-trigger {
+  box-sizing: border-box;
+  margin: 16px 0;
+  font-size: 16px !important; /* override default font size (.isWin button) */
   background: linear-gradient(145deg, rgba(39, 39, 42, 0.6), rgba(24, 24, 27, 0.8));
   color: var(--text-primary);
   border: 1px solid var(--bg-hover);
@@ -123,7 +126,6 @@ button, input, select, textarea {
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-bottom: 8px; /* Slight gap before the content opens */
 }
 .accordion-trigger:active { transform: scale(0.98); }
 .accordion-trigger:hover { background: var(--bg-hover); }
@@ -155,7 +157,7 @@ button, input, select, textarea {
 }
 
 .accordion-inner-padding {
-  padding: 8px 0 24px 0; /* Padding put inside to prevent layout jumps during animation */
+  padding: 0 0 24px 0; /* Padding put inside to prevent layout jumps during animation */
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -357,6 +359,15 @@ button, input, select, textarea {
   margin-bottom: 10px;
   width: 100%;
   overflow-x: scroll;
+  
+  /*  Hides scrollbar for Chrome, Safari, Opera, and Anki Desktop (Webkit) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hides scrollbar for Firefox */
+  scrollbar-width: none;
+  /* Hides scrollbar for IE and old Edge */
+  -ms-overflow-style: none;
 }
 
 .entry-header > span {
