@@ -42,13 +42,13 @@ button, input, select, textarea {
     line-height: inherit;
 }
 
-.card {
+.flashcard {
   background-color: var(--bg-card);
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
   max-width: 600px;
   margin: 0 auto;
-  overflow: hidden;
+  overflow: hidden; 
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -70,7 +70,20 @@ button, input, select, textarea {
   margin-bottom: 12px;
 }
 
-.headword { display: none; } /* Hide the default Anki headword from back.html */
+.headword { 
+  text-align: center;
+  font-size: 2.5rem;
+  margin: 10px 0 24px 0;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.back-card .headword { 
+  display: none; 
+}
+
 .separator { display: none; }
 
 .content-area {
