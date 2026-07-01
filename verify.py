@@ -2,8 +2,11 @@ import json
 import os
 import csv
 import time
+import asyncio
+import argparse
 from typing import List, Optional, Dict, Any, Tuple
 from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 from utils import BatchVerificationResult, VerificationResult, get_few_shots, SYSTEM_PROMPT, get_common_parser, Flashcard, BatchFlashcard
 
@@ -11,7 +14,7 @@ load_dotenv()
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY"), 
     http_options={
-        "timeout": 120_000 # 2 minute
+        "timeout": 180_000 # 2 minute
     }
 )
 
@@ -53,7 +56,7 @@ For each card in the batch:
 {SYSTEM_PROMPT}
 """
 
-def verify_batch(batch_items: List[Dict[str, str]], human_examples: List[Tuple[str, Flashcard]]) -> Optional[BatchVerificationResult]:
+async def verify_batch_async(batch_items: List[Dict[str, str]], human_examples: List[Tuple[str, Flashcard]]) -> Optional[BatchVerificationResult]:
     few_shot = "### GOLD STANDARD EXAMPLES (PERFECT):\n"
     for ex in human_examples:
         (headword, flashcard) = ex
@@ -64,32 +67,95 @@ def verify_batch(batch_items: List[Dict[str, str]], human_examples: List[Tuple[s
         batch_prompt += f"Card {i+1} ({item['headword']}):\n{item['response']}\n---\n"
     
     try:
-        response = client.models.generate_content(
+        # Utilize the non-blocking asynchronous SDK endpoint .aio
+        response = await client.aio.models.generate_content(
             model="gemma-4-31b-it",
             contents=batch_prompt,
-            config={
-                "system_instruction": AUDITOR_SYSTEM_PROMPT,
-                "response_mime_type": "application/json",
-                "response_schema": BatchVerificationResult,
-                "temperature": 0.3,
-                "thinking_config": {
-                    "include_thoughts": False,
-                    "thinking_level": "high"
-                }
-            } # type: ignore
+            config=types.GenerateContentConfig(
+                system_instruction=AUDITOR_SYSTEM_PROMPT,
+                response_mime_type="application/json",
+                response_schema=BatchVerificationResult,
+                temperature=0.3,
+                thinking_config=types.ThinkingConfig(
+                    include_thoughts=False,
+                    thinking_level="high" # type: ignore
+                )
+            )
         )
         return response.parsed # type: ignore
     except Exception as e:
         print(f"Error verifying batch: {e}")
         return None
 
-def main() -> None:
+def write_entire_tsv(file_path: str, fieldnames: List[str], rows: List[Dict[str, str]]) -> None:
+    """Helper used to safely execute blocking disk serialization inside an OS threadpool."""
+    with open(file_path, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
+        writer.writeheader()
+        writer.writerows(rows)
+
+async def audit_chunk_slot(
+    semaphore: asyncio.Semaphore,
+    file_path: str,
+    fieldnames: List[str],
+    rows: List[Dict[str, str]],
+    batch_idx_chunk: List[int],
+    human_examples: List[Tuple[str, Flashcard]],
+    file_lock: asyncio.Lock,
+    batch_num: int,
+    total_batches: int,
+    counter_dict: Dict[str, int]
+):
+    """Executes a batch audit using a strict semaphore-controlled async slot wrapper."""
+    async with semaphore:
+        batch_items = [rows[idx] for idx in batch_idx_chunk]
+        timestamp = time.strftime("%H:%M:%S")
+        print(f"[{timestamp}] Processing batch {batch_num} of {total_batches}...")
+        start_time = time.perf_counter()
+        
+        success = False
+        attempts = 0
+        while not success:
+            try:
+                # API context processing handles out-of-order execution outside the file lock
+                batch_result = await verify_batch_async(batch_items, human_examples)
+                
+                if not batch_result or len(batch_result.results) != len(batch_items):
+                    if batch_result:
+                        raise ValueError(f"Batch size mismatch (required {len(batch_items)}, got {len(batch_result.results)}).")
+                    else:
+                        raise ValueError("API returned an empty payload or malformed validation block.")
+
+                # Mutate state and commit serialization atomically inside the lock
+                async with file_lock:
+                    for result, row_idx in zip(batch_result.results, batch_idx_chunk):
+                        rows[row_idx]["verification"] = "ai_pass" if result.status == "pass" else "ai_fail"
+                        rows[row_idx]["comment"] = result.comment
+                        counter_dict["updated_count"] += 1
+                    
+                    await asyncio.to_thread(write_entire_tsv, file_path, fieldnames, rows)
+                    elapsed = time.perf_counter() - start_time
+                    timestamp = time.strftime("%H:%M:%S")
+                    print(f"[{timestamp}] Successfully processed batch {batch_num} in {elapsed:.2f}s.")
+
+                success = True
+                
+            except Exception as e:
+                attempts += 1
+                if attempts >= 3:
+                    print(f"    Max attempts reached for batch {batch_num}. Skipping data slice.")
+                    break
+                print(f"    Error at batch {batch_num} (attempt {attempts}): {e}")
+                await asyncio.sleep(12)  # Cooldown padding block to alleviate gateway density
+
+async def main_async() -> None:
     # Configurations
     parser = get_common_parser("Level to audit.")
     args = parser.parse_args()
     
     verify_level = args.level
-    batch_size = 25
+    batch_size = 5
+    workers = 5  # Exactly 5 slots saturated at all times
 
     human_examples = get_few_shots()
     file_path: str = f"data/raw/level{verify_level}.tsv"
@@ -98,8 +164,7 @@ def main() -> None:
         print(f"File {file_path} not found.")
         return
 
-    # Read all rows
-    rows: List[Dict[str, str]] = []
+    # Read all rows into initial memory array
     with open(file_path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter="\t")
         if not reader.fieldnames:
@@ -107,47 +172,49 @@ def main() -> None:
         fieldnames: List[str] = list(reader.fieldnames)
         rows = list(reader)
 
-    if not fieldnames: return
+    if not fieldnames: 
+        return
 
     # Identify cards needing verification
     pending_indices = [i for i, r in enumerate(rows) if r.get("verification") == "none"]
+    total_pending = len(pending_indices)
 
-    updated_count = 0
-    
-    print(f"Auditing {len(pending_indices)} cards in batches of {batch_size} for Level {verify_level}...")
-    
-    for i in range(0, len(pending_indices), batch_size):
-        batch_idx_chunk = pending_indices[i : i + batch_size]
-        batch_items = [rows[idx] for idx in batch_idx_chunk]
-        
-        print(f"  Processing batch {i//batch_size + 1} ({len(batch_items)} cards)...")
-        
-        batch_result = verify_batch(batch_items, human_examples)
-        
-        if batch_result and len(batch_result.results) == len(batch_items):
-            for result, row_idx in zip(batch_result.results, batch_idx_chunk):
-                rows[row_idx]["verification"] = "ai_pass" if result.status == "pass" else "ai_fail"
-                rows[row_idx]["comment"] = result.comment
-                updated_count += 1
-            print(f"    Batch complete. Total updated: {updated_count}")
-
-            # Save progress incrementally
-            with open(file_path, "w", encoding="utf-8", newline="") as f:
-                writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
-                writer.writeheader()
-                writer.writerows(rows)
-        else:
-            if batch_result and len(batch_result.results) != len(batch_items):
-                print(f"    Error: Batch size mismatch (required {len(batch_items)}, got {len(batch_result.results)}). Skipping batch.")
-            else:
-                print(f"    Error: API returned no results. Skipping batch.")
-        
-        time.sleep(4) # Be polite to API
-
-    if updated_count > 0:
-        print(f"Verification session finished. Successfully verified {updated_count} cards. {len(pending_indices) - updated_count} remaining.")
-    else:
+    if total_pending == 0:
         print("No cards needed verification.")
+        return
+        
+    print(f"Auditing {total_pending} cards in batches of {batch_size} for Level {verify_level}...")
+    
+    # Initialize shared variables and primitives
+    counter_dict = {"updated_count": 0}
+    file_lock = asyncio.Lock()
+    pool_semaphore = asyncio.Semaphore(workers)
+    
+    batches_indices = [pending_indices[i : i + batch_size] for i in range(0, total_pending, batch_size)]
+    total_batches = len(batches_indices)
+
+    tasks = []
+    for idx, batch_idx_chunk in enumerate(batches_indices):
+        task = audit_chunk_slot(
+            semaphore=pool_semaphore,
+            file_path=file_path,
+            fieldnames=fieldnames,
+            rows=rows,
+            batch_idx_chunk=batch_idx_chunk,
+            human_examples=human_examples,
+            file_lock=file_lock,
+            batch_num=idx + 1,
+            total_batches=total_batches,
+            counter_dict=counter_dict
+        )
+        tasks.append(task)
+
+    # Resolve all pipeline steps matching pool context allocations
+    await asyncio.gather(*tasks)
+
+    updated_count = counter_dict["updated_count"]
+    if updated_count > 0:
+        print(f"Verification session finished. Successfully verified {updated_count} cards. {total_pending - updated_count} remaining.")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main_async())
