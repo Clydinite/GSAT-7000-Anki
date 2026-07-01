@@ -82,8 +82,10 @@ async def process_chunk(client, chunk: List[str], human_examples: List[Tuple[str
             if batch_results is None:
                 raise ValueError("API returned an empty response layout or failed schema decoding.")
             
+            # CRITICAL FIX: Bind the success flag directly to the file append operation
             async with file_lock:
                 await asyncio.to_thread(append_to_raw_tsv, level, chunk, batch_results)
+                success = True # Once written to disk, this chunk is officially complete
             
             elapsed = time.perf_counter() - start_time
             timestamp = time.strftime("%H:%M:%S")
@@ -112,10 +114,13 @@ async def main():
         word_list = [line.strip() for line in f.readlines()]
 
     if replace_mode and os.path.exists(output_file):
+        print(f"Replace mode active. Clearing AI entries from {output_file}...")
         with open(output_file, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f, delimiter="\t")
             fieldnames = reader.fieldnames
             rows = [r for r in reader if r.get("verification") == "human"]
+        
+        # Open in 'w' to truncate the file completely before rewriting
         with open(output_file, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t") # type: ignore
             writer.writeheader()
