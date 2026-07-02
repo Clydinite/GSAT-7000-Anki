@@ -111,7 +111,7 @@ Rules:
 Fields Guide:
 - headword: The base form of the word. Do not include any POS tags, parentheses, or suffix variations here (e.g., use "achieve", not "achieve (v.)" or "achieve(ment)").
 - explanation: A high-value usage note in Traditional Chinese focusing on syntax, common errors, or core conceptual metaphors. Avoid filler words or explicitly mentioning the acronym "GSAT".
-- senses: A list of core semantic clusters. Please split the meanings into separate senses if they would not be considered related by a student. (not to linguists, but to GSAT students) 
+- senses: A list of core semantic clusters. Please split the meanings into separate senses if they would not be considered related by a student. Different part-of-speech of the same concept should be considered the same sense if it's logically related (hammer n. vs. hammer v.).
 - entries: A list of distinct collocation patterns or phrases belonging to that specific sense.
     - pattern: The specific grammatical structure or formula (e.g., "accuse sb. of sth.", "object to sth./doing sth."). Please provide a significant amount of patterns to prepare the student for the test.
     - pos: The part of speech enum value matching the pattern.
