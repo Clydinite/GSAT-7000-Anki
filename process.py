@@ -22,6 +22,8 @@ if not API_KEY:
 
 parser = get_common_parser("Generate vocabulary cards.")
 parser.add_argument("--replace", "-r", action="store_true", help="Replace existing AI entries (preserving human ones).")
+parser.add_argument("--batch-size", "-b", type=int, default=1, help="Batch size for processing.")
+parser.add_argument("--worker-count", "-w", type=int, default=5, help="Number of concurrent workers.")
 
 args = parser.parse_args()
 
@@ -130,8 +132,8 @@ async def main():
     words_to_process = [w for w in word_list if w not in processed_words]
     print(f"Processing {len(words_to_process)} words.")
 
-    chunk_size = 1
-    workers = 5
+    chunk_size = args.batch_size
+    workers = args.worker_count
     chunks = [words_to_process[i : i + chunk_size] for i in range(0, len(words_to_process), chunk_size)]
     total_chunks = len(chunks)
     human_examples = get_few_shots()

@@ -152,11 +152,13 @@ async def audit_chunk_slot(
 async def main_async() -> None:
     # Configurations
     parser = get_common_parser("Level to audit.")
+    parser.add_argument("--batch-size", "-b", type=int, default=5, help="Batch size for processing.")
+    parser.add_argument("--worker-count", "-w", type=int, default=5, help="Number of concurrent workers.")
     args = parser.parse_args()
     
     verify_level = args.level
-    batch_size = 5
-    workers = 5  # Exactly 5 slots saturated at all times
+    batch_size = args.batch_size
+    workers = args.worker_count
 
     human_examples = get_few_shots()
     file_path: str = f"data/raw/level{verify_level}.tsv"
