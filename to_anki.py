@@ -111,7 +111,7 @@ def generate_html(card: Flashcard) -> str:
                     html_parts.append(f'<div class="entry-explanation hideable">{html.escape(entry.explanation)}</div>')
                 
                 if entry.sentences:
-                    html_parts.append('<div class="sentences">')
+                    html_parts.append('<div class="sentences hideable">')
                     for s in entry.sentences:
                         html_parts.append('<div class="sentence">')
                         html_parts.append(f'<p class="sentence-en">{format_sentence(s.sentence)}</p>')
