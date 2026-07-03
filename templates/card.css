@@ -373,7 +373,7 @@ button, input, select, textarea {
 
 .entry-header {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   flex-wrap: nowrap;
   gap: 10px;
   margin-bottom: 10px;
@@ -395,13 +395,13 @@ button, input, select, textarea {
 }
 
 .pos-badge {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
   font-weight: 700;
   color: #fff;
   padding: 2px 0;
   border-radius: 4px;
-  width: 50px;
+  width: 4ch0px;
   text-align: center;
   display: inline-block;
 }
@@ -414,19 +414,19 @@ button, input, select, textarea {
 .pos-phrase, .pos-idiom { color: var(--pos-phrase); border-color: rgba(161, 161, 170, 0.2); background: rgba(161, 161, 170, 0.05); }
 
 .entry-pattern {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .entry-translation {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
   font-weight: 500;
 }
 
 .entry-explanation {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   background: rgba(0,0,0,0.25);
   padding: 10px 14px;
@@ -458,14 +458,14 @@ button, input, select, textarea {
 
 .sentence-en {
   margin: 0 0 4px 0;
-  font-size: 0.95rem;
+  font-size: 0.90rem;
   color: #e4e4e7;
   line-height: 1.5;
 }
 
 .sentence-zh {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.80rem;
   color: var(--text-muted);
 }
 
