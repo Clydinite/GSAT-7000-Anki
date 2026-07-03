@@ -21,18 +21,32 @@ def strip_tags(text: str) -> str:
 
 import html
 
+# Mapping for POS abbreviations
+POS_ABBREV = {
+    "noun": "noun",
+    "verb": "verb",
+    "adjective": "adj",
+    "adverb": "adv",
+    "pronoun": "pron",
+    "preposition": "prep",
+    "conjunction": "conj",
+    "interjection": "int",
+    "determiner": "det",
+}
+
 def render_word_pos_list(title, items):
     if not items: return ""
     res = ['<div class="meta-block">']
     res.append(f'<div class="meta-block-title">{title}</div>')
     res.append('<div class="relatives-group">')
     for item in items:
-        pos = item.pos.value.lower()
+        pos_val = item.pos.value.lower()
+        pos_label = POS_ABBREV.get(pos_val, pos_val)
         explanation_html = f'<div class="rel-explanation">{html.escape(item.explanation)}</div>' if item.explanation else ""
         res.append(
             f'<div class="relative-badge">'
             f'<div class="rel-main">'
-            f'<span class="rel-pos pos-{pos}">{pos}</span>'
+            f'<span class="rel-pos pos-{pos_val}">{pos_label}</span>'
             f'<span class="rel-word">{html.escape(item.word)}</span>'
             f'<span class="rel-trans">{html.escape(item.translation)}</span>'
             f'</div>'
@@ -102,7 +116,7 @@ def generate_html(card: Flashcard) -> str:
                 html_parts.append('<div class="entry-item">')
                 pos_class = f"pos-{entry.pos.value.lower()}"
                 html_parts.append('<div class="entry-header">')
-                html_parts.append(f'<span class="pos-badge {pos_class}">{html.escape(entry.pos.value.lower())}</span>')
+                html_parts.append(f'<span class="pos-badge {pos_class}">{POS_ABBREV.get(entry.pos.value.lower(), entry.pos.value.lower())}</span>')
                 html_parts.append(f'<span class="entry-pattern">{html.escape(entry.pattern)}</span>')
                 html_parts.append(f'<span class="entry-translation">{html.escape(entry.translation)}</span>')
                 html_parts.append('</div>')
