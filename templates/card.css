@@ -315,6 +315,27 @@ button, input, select, textarea {
   border-bottom: 1px solid var(--bg-hover);
 }
 
+.sense-title-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sense-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.sense-explanation {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+  font-weight: 400;
+}
+
 .sense-idx {
   background: var(--bg-hover);
   color: var(--text-primary);
@@ -327,13 +348,6 @@ button, input, select, textarea {
   font-size: 0.9rem;
   font-weight: 700;
   flex-shrink: 0;
-}
-
-.sense-title {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--text-primary);
 }
 
 /* Dictionary Entries */
