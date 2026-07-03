@@ -22,15 +22,10 @@
     trigger.innerHTML = `<span>${labelText}</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
     section.classList.add('accordion-content');
 
-    const allHideables = document.querySelectorAll(".hideable");
-    
     trigger.onclick = (e) => {
       e.preventDefault();
       const isExpanded = trigger.classList.toggle('active');
       section.classList.toggle('expanded');
-      allHideables.forEach(el => {
-        el.classList.toggle('expanded', isExpanded);
-      })
     };
     section.parentNode.insertBefore(trigger, section);
   });

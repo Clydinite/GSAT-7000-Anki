@@ -463,8 +463,24 @@ button, input, select, textarea {
   text-underline-offset: 4px;
 }
 
-/* Hide and Show */
-.hideable {
+.sense-reveal-btn {
+  margin-left: auto;
+  font-size: 12px !important;
+  background: linear-gradient(145deg, rgba(39, 39, 42, 0.6), rgba(24, 24, 27, 0.8));
+  color: var(--text-primary);
+  border: 1px solid var(--bg-hover);
+  border-radius: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sense-reveal-btn:hover { background: var(--bg-hover); }
+.sense-reveal-btn:active { transform: scale(0.98); }
+
+.sense-group .hideable {
   display: block;
   opacity: 0;
   max-height: 0;
@@ -472,18 +488,20 @@ button, input, select, textarea {
   transition: opacity 0.3s ease-out, max-height 0.3s ease-out;
 }
 
-.entry-explanation.hideable {
-  padding: 0;
-}
-
-.hideable.expanded {
+.sense-group.expanded .hideable {
   opacity: 1;
-  max-height: 500px; /* Sufficiently large for content */
+  max-height: 2000px; /* Large enough for content */
 }
 
-.entry-explanation.hideable.expanded {
-  padding: 10px 14px;
-  margin-bottom: 10px;
+/* Fix spacing for revealed content */
+.sense-group.expanded .entry-explanation.hideable { padding: 10px 14px; margin-bottom: 10px; }
+
+.sense-group.expanded .sense-meta-extras.hideable {
+  display: flex;
+  opacity: 1;
+  margin-top: 0px;
+  max-height: 500px;
+  transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out 0.1s;
 }
 
 .sense-meta-extras {
@@ -492,21 +510,19 @@ button, input, select, textarea {
   gap: 16px;
   padding-top: 16px;
   border-top: 1px dashed var(--bg-hover);
+  width: 100%; /* Ensure full width */
 }
 
-.sense-meta-extras.hideable {
+.sense-group .sense-meta-extras.hideable {
   display: block;
-  margin-top: -30px; /* Hack */
+  margin-top: -30px;
   opacity: 0;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease-in-out 0.2s, opacity 0.2s ease-out;
+  width: 100%; /* Ensure full width */
 }
 
-.sense-meta-extras.hideable.expanded {
-  display: flex;
-  opacity: 1;
-  margin-top: 0px;
-  max-height: 500px;
-  transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out 0.1s;
+.entry-explanation.hideable {
+  padding: 0;
 }
