@@ -29,6 +29,16 @@
     };
     section.parentNode.insertBefore(trigger, section);
   });
+
+  // Sense Reveal logic
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList.contains('sense-reveal-btn')) {
+      const group = e.target.closest('.sense-group');
+      if (group) {
+        group.classList.toggle('expanded');
+      }
+    }
+  });
 })();
 
 // TTS Engine

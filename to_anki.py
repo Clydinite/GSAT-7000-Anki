@@ -94,7 +94,7 @@ def generate_html(card: Flashcard) -> str:
             html_parts.append('<div class="sense-heading">')
             html_parts.append(f'<span class="sense-idx">{i:02d}</span>')
             html_parts.append(f'<h2 class="sense-title">{html.escape(sense.sense)}</h2>')
-            html_parts.append('<button class="sense-reveal-btn" onclick="this.closest(\'.sense-group\').classList.toggle(\'expanded\')">Reveal</button>')
+            html_parts.append('<button class="sense-reveal-btn">Reveal</button>')
             html_parts.append('</div>')
             
             html_parts.append('<div class="entry-list">')
