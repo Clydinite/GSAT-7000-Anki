@@ -51,6 +51,7 @@ class Entry(BaseModel):
 
 class Sense(BaseModel):
     sense: str = Field(..., description="Core meaning in Traditional Chinese")
+    explanation: Optional[str] = Field(None, description="Additional notes for this specific sense in Traditional Chinese")
     entries: List[Entry]
     synonyms: List[WordPosTranslation] = Field(default_factory=list)
     antonyms: List[WordPosTranslation] = Field(default_factory=list)
