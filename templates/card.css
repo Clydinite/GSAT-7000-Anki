@@ -487,7 +487,7 @@ button, input, select, textarea {
 }
 
 .sense-reveal-btn {
-  margin-left: auto;
+  margin: 0 0 0 auto;
   font-size: 12px !important;
   background: linear-gradient(145deg, rgba(39, 39, 42, 0.6), rgba(24, 24, 27, 0.8));
   color: var(--text-primary);
