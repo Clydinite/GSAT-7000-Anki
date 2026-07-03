@@ -104,7 +104,7 @@ def generate_html(card: Flashcard) -> str:
                 html_parts.append('<div class="entry-header">')
                 html_parts.append(f'<span class="pos-badge {pos_class}">{html.escape(entry.pos.value.lower())}</span>')
                 html_parts.append(f'<span class="entry-pattern">{html.escape(entry.pattern)}</span>')
-                html_parts.append(f'<span class="entry-translation hideable">{html.escape(entry.translation)}</span>')
+                html_parts.append(f'<span class="entry-translation">{html.escape(entry.translation)}</span>')
                 html_parts.append('</div>')
                 
                 if entry.explanation:
