@@ -9,7 +9,8 @@ sample_card = Flashcard.model_validate(
   "explanation": "「object」在學測中為核心必考字彙。名詞與動詞的語意、用法截然不同。名詞包含具體的「物理實體」與抽象的「行動目標/情感對象」，動詞則主要為「反對」。",
   "senses": [
     {
-      "sense": "物體；物品（物理上可見或存在的實體）",
+      "sense": "物體；物品",
+      "explanation": "物理上可見或存在的實體",
       "entries": [
         {
           "pattern": "object",
@@ -39,7 +40,8 @@ sample_card = Flashcard.model_validate(
       "antonyms": []
     },
     {
-      "sense": "目標；對象（行動的核心意圖，或情感投射的目標）",
+      "sense": "目標；對象",
+      "explanation": "行動的核心意圖，或情感投射的目標",
       "entries": [
         {
           "pattern": "the object of sth.",
@@ -82,7 +84,8 @@ sample_card = Flashcard.model_validate(
       "antonyms": []
     },
     {
-      "sense": "反對；提出異議（對某事表示不贊同或抗議）",
+      "sense": "反對；提出異議",
+      "explanation": "對某事表示不贊同或抗議",
       "entries": [
         {
           "pattern": "object to sth./doing sth.",

@@ -140,7 +140,8 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                     "explanation": "「predict」在學測中是探討未來趨勢、氣候變遷以及科技發展時必備的核心動詞。理解這個字時，要注意其後方常連接抽象名詞或完整的名詞子句（that 子句）作為預測之具體內容。",
                     "senses": [
                         {
-                            "sense": "預測；預言（根據已知跡象或數據推測未來）",
+                            "sense": "預測；預言",
+                            "explanation": "根據已知跡象或數據推測未來之走向。",
                             "entries": [
                                 {
                                     "pattern": "predict sth.",
@@ -220,7 +221,8 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                     "explanation": "「object」在學測中為核心必考字彙。名詞與動詞的語意、用法截然不同。名詞包含具體的「物理實體」與抽象的「行動目標/情感對象」，動詞則主要為「反對」。將其拆分為三大獨立語意區塊以利高效率、原子化記憶。",
                     "senses": [
                         {
-                            "sense": "物體；物品（物理上可見或存在的實體）",
+                            "sense": "物體；物品",
+                            "explanation": "指物理上可見或存在的實體物件。",
                             "entries": [
                                 {
                                     "pattern": "object",
@@ -250,7 +252,8 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                             "antonyms": []
                         },
                         {
-                            "sense": "目標；對象（行動的核心意圖，或情感投射的目標）",
+                            "sense": "目標；對象",
+                            "explanation": "指行動的核心意圖，或情感投射的目標對象。",
                             "entries": [
                                 {
                                     "pattern": "the object of sth.",
@@ -293,7 +296,8 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                             "antonyms": []
                         },
                         {
-                            "sense": "反對；提出異議（對某事表示不贊同或抗議）",
+                            "sense": "反對；提出異議",
+                            "explanation": "對某事表示不贊同、抗議或提出異議。",
                             "entries": [
                                 {
                                     "pattern": "object to sth./doing sth.",
@@ -359,7 +363,8 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                     "explanation": "「undergo」在學測綜合測驗與文意選填中非常高頻。這個字高度依賴後方接續的名詞來決定中文翻譯（如轉變、手術、考驗等），學生必須學會辨識特定的核心名詞搭配來解題。",
                     "senses": [
                         {
-                            "sense": "經歷；遭受（巨大的變革、重大的醫療或痛苦的試煉）",
+                            "sense": "經歷；遭受",
+                            "explanation": "經歷巨大的變革、重大的醫療過程或痛苦的試煉。",
                             "entries": [
                                 {
                                     "pattern": "undergo a change / transformation",
@@ -435,7 +440,8 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                 "explanation": "「remotely」在學測中主要出現於兩種高頻語境：一是因應科技發展而形成的「遠端/線上」工作或學習描述；二是在否定句中作為加強語氣的修飾語，意思是「絲毫、根本」，是克漏字與精確閱讀的重要考點。",
                 "senses": [
                     {
-                        "sense": "遠端地；遙遠地（空間上的隔空操作）",
+                        "sense": "遠端地；遙遠地",
+                        "explanation": "指在空間上透過技術或網絡進行的隔空操作。",
                         "entries": [
                             {
                                 "pattern": "work / control remotely",
@@ -458,7 +464,8 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                         ]
                     },
                     {
-                        "sense": "絲毫；根本（用於否定句，加強否定語氣）",
+                        "sense": "絲毫；根本",
+                        "explanation": "常用於否定句中，用以強烈地加強否定語氣。",
                         "entries": [
                             {
                                 "pattern": "not remotely adj.",
