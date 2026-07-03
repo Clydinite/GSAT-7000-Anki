@@ -355,7 +355,10 @@ button, input, select, textarea {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+}
+
+.entry-item + .entry-item {
+  margin-top: 16px;
 }
 
 .entry-item {
@@ -537,13 +540,23 @@ button, input, select, textarea {
 }
 
 .sense-group .sense-meta-extras.hideable {
-  display: block;
-  margin-top: -30px;
   opacity: 0;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease-in-out 0.2s, opacity 0.2s ease-out;
   width: 100%; /* Ensure full width */
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.sense-group.expanded .sense-meta-extras.hideable {
+  display: flex;
+  opacity: 1;
+  max-height: 500px;
+  border-top: 1px dashed var(--bg-hover);
+  padding-top: 16px;
+  margin-top: 16px;
 }
 
 .entry-explanation.hideable {
