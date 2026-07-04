@@ -1,71 +1,162 @@
-import csv
+from utils import get_common_parser, Flashcard
+import html
 import json
 import re
 import os
-import html
-from utils import get_common_parser
+import csv
 
-def format_sentence(sentence):
+def format_sentence(sentence: str) -> str:
     """Adds styling spans to the sentence markers."""
-    # Replace <target>word</target> with <span class="target-word">word</span>
     sentence = re.sub(r'<target>(.*?)</target>', r'<span class="target-word">\1</span>', sentence)
-    # Replace <pattern>collocation</pattern> with <span class="collocation">collocation</span>
     sentence = re.sub(r'<pattern>(.*?)</pattern>', r'<span class="collocation">\1</span>', sentence)
     return sentence
 
-def clean_for_tts(sentence):
+def clean_for_tts(sentence: str) -> str:
     """Removes marker characters for clean speech synthesis."""
-    # Remove all XML-style tags
     return re.sub(r'<[^>]*>', '', sentence).strip()
 
-def strip_tags(text):
-    """Removes XML-style tags for clean display in non-sentence fields."""
+def strip_tags(text: str) -> str:
+    """Removes XML-style tags for clean display."""
     return re.sub(r'<[^>]*>', '', text).strip()
 
-def generate_html(data):
-    html_parts = []
-    html_parts.append('<div class="anki-card-content">')
+import html
 
-    # General Explanation
-    if data.get("explanation"):
-        html_parts.append(f'<div class="general-explanation">{html.escape(strip_tags(data["explanation"]))}</div>')
+# Mapping for POS abbreviations
+POS_ABBREV = {
+    "noun": "noun",
+    "verb": "verb",
+    "adjective": "adj",
+    "adverb": "adv",
+    "pronoun": "pron",
+    "preposition": "prep",
+    "conjunction": "conj",
+    "interjection": "int",
+    "determiner": "det",
+}
 
-    # Entries
-    html_parts.append('<div class="entries-container">')
-    for entry in data.get("entries", []):
-        sentence_raw = entry.get("sentence", "")
-        clean_tts = clean_for_tts(sentence_raw)
-        safe_tts = html.escape(clean_tts, quote=True)
+def render_word_pos_list(title, items):
+    if not items: return ""
+    res = ['<div class="meta-block">']
+    res.append(f'<div class="meta-block-title">{title}</div>')
+    res.append('<div class="relatives-group">')
+    for item in items:
+        pos_val = item.pos.value.lower()
+        pos_label = POS_ABBREV.get(pos_val, pos_val)
+        explanation_html = f'<div class="rel-explanation">{html.escape(item.explanation)}</div>' if item.explanation else ""
+        res.append(
+            f'<div class="relative-badge">'
+            f'<div class="rel-main">'
+            f'<span class="rel-pos pos-{pos_val}">{pos_label}</span>'
+            f'<span class="rel-word">{html.escape(item.word)}</span>'
+            f'<span class="rel-trans">{html.escape(item.translation)}</span>'
+            f'</div>'
+            f'{explanation_html}'
+            f'</div>'
+        )
+    res.append('</div></div>')
+    return "".join(res)
+
+def generate_html(card: Flashcard) -> str:
+    html_parts = ['<div class="anki-card-content">']
+    
+    # 1. Headword
+    html_parts.append(f'<h1 class="card-headword">{html.escape(card.headword)}</h1>')
+
+    # 2. Animated Dropdown Section (General Explanation & Meta Data)
+    # Check if we have any meta content left
+    has_meta = card.conjugations or (card.relatives and (card.relatives.morphology or card.relatives.related))
+    
+    if card.explanation or has_meta:
+        html_parts.append('<div class="meta-section" data-label="Word Origin, Details & Explanation">')
+        html_parts.append('<div class="accordion-inner">') 
+        html_parts.append('<div class="accordion-inner-padding">')
         
-        html_parts.append('<div class="entry">')
-        html_parts.append('<div class="sentence-row">')
-        html_parts.append(f'<div class="sentence">{format_sentence(sentence_raw)}</div>')
-        
-        # We use this.getAttribute to avoid the JS quote escaping issue entirely.
-        html_parts.append(f'<button class="tts-button" data-tts="{safe_tts}" onclick="window.playTTS(this.getAttribute(\'data-tts\'))">')
-        html_parts.append('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>')
-        html_parts.append('</button></div>')
-
-        if entry.get("translation") or entry.get("explanation"):
-            html_parts.append('<div class="meta-section">')
-            if entry.get("translation"):
-                html_parts.append(f'<div class="translation">{html.escape(strip_tags(entry["translation"]))}</div>')
-            if entry.get("explanation"):
-                html_parts.append(f'<div class="entry-explanation">{html.escape(strip_tags(entry["explanation"]))}</div>')
+        if card.explanation:
+            html_parts.append(f'<div class="general-explanation">{html.escape(card.explanation)}</div>')
+            
+        if has_meta:
+            html_parts.append('<div class="meta-content-inner">')
+            
+            # Conjugations
+            if card.conjugations:
+                html_parts.append('<div class="meta-block">')
+                html_parts.append('<div class="meta-block-title">Conjugations</div>')
+                html_parts.append('<div class="meta-grid">')
+                html_parts.append(f'<div class="meta-card"><span class="meta-card-label">Past</span><span class="meta-card-value">{html.escape(card.conjugations.past_tense)}</span></div>')
+                html_parts.append(f'<div class="meta-card"><span class="meta-card-label">Past Participle</span><span class="meta-card-value">{html.escape(card.conjugations.past_participle)}</span></div>')
+                html_parts.append('</div></div>')
+                
+            # Morphology
+            if card.relatives and card.relatives.morphology:
+                html_parts.append('<div class="meta-block">')
+                html_parts.append('<div class="meta-block-title">Morphology</div>')
+                html_parts.append(f'<div class="morphology-text">{html.escape(card.relatives.morphology)}</div>')
+                html_parts.append('</div>')
+                
+            if card.relatives and card.relatives.related:
+                html_parts.append(render_word_pos_list("Related Words", card.relatives.related))
+                
             html_parts.append('</div>')
-        html_parts.append('</div>')
+            
+        html_parts.append('</div></div></div>')
+
+    # 3. Core Senses
+    if card.senses:
+        html_parts.append('<div class="senses-container">')
+        for i, sense in enumerate(card.senses, 1):
+            html_parts.append('<div class="sense-group">')
+            html_parts.append('<div class="sense-heading">')
+            html_parts.append(f'<span class="sense-idx">{i:02d}</span>')
+            html_parts.append('<div class="sense-title-container">')
+            html_parts.append(f'<h2 class="sense-title">{html.escape(sense.sense)}</h2>')
+            if sense.explanation:
+                html_parts.append(f'<div class="sense-explanation">{html.escape(sense.explanation)}</div>')
+            html_parts.append('</div>')
+            html_parts.append('<button class="sense-reveal-btn">Reveal</button>')
+            html_parts.append('</div>')
+            
+            html_parts.append('<div class="entry-list">')
+            for entry in sense.entries:
+                html_parts.append('<div class="entry-item">')
+                pos_class = f"pos-{entry.pos.value.lower()}"
+                html_parts.append('<div class="entry-header">')
+                html_parts.append(f'<span class="pos-badge {pos_class}">{POS_ABBREV.get(entry.pos.value.lower(), entry.pos.value.lower())}</span>')
+                html_parts.append('<div class="entry-text-group">')
+                html_parts.append(f'<span class="entry-pattern">{html.escape(entry.pattern)}</span>')
+                html_parts.append(f'<span class="entry-translation">{html.escape(entry.translation)}</span>')
+                html_parts.append('</div>')
+                html_parts.append('</div>')
+                
+                if entry.explanation:
+                    html_parts.append(f'<div class="entry-explanation hideable">{html.escape(entry.explanation)}</div>')
+                
+                if entry.sentences:
+                    html_parts.append('<div class="sentences hideable">')
+                    for s in entry.sentences:
+                        html_parts.append('<div class="sentence">')
+                        html_parts.append(f'<p class="sentence-en">{format_sentence(s.sentence)}</p>')
+                        html_parts.append(f'<p class="sentence-zh hideable">{html.escape(s.translation)}</p>')
+                        html_parts.append('</div>')
+                    html_parts.append('</div>')
+                html_parts.append('</div>') # end entry-item
+            
+            # Nested Section: Synonyms & Antonyms
+            if sense.synonyms or sense.antonyms:
+                html_parts.append('<div class="sense-meta-extras hideable">')
+                if sense.synonyms:
+                    html_parts.append(render_word_pos_list("Synonyms", sense.synonyms))
+                if sense.antonyms:
+                    html_parts.append(render_word_pos_list("Antonyms", sense.antonyms))
+                html_parts.append('</div>')
+            
+            html_parts.append('</div>') # end entry-list
+            html_parts.append('</div>') # end sense-group
+        html_parts.append('</div>') # end senses-container
+
     html_parts.append('</div>')
+    return "".join(html_parts)
 
-    # Related Forms
-    if data.get("related_forms"):
-        forms = html.escape(", ".join(data["related_forms"]))
-        html_parts.append(f'<div class="related-forms"><span class="label">Related:</span> {forms}</div>')
-
-    html_parts.append('</div>')
-    # Flatten to single line
-    return re.sub(r'\s+', ' ', "".join(html_parts)).strip()
-
-def convert_to_anki(input_file, output_file):
+def convert_to_anki(input_file: str, output_file: str):
     if not os.path.exists(input_file):
         print(f"Error: {input_file} not found.")
         return
@@ -77,8 +168,8 @@ def convert_to_anki(input_file, output_file):
         count = 0
         for row in reader:
             try:
-                data = json.loads(row["response"])
-                writer.writerow([row["headword"], generate_html(data)])
+                card = Flashcard.model_validate_json(row["response"])
+                writer.writerow([card.headword, generate_html(card)])
                 count += 1
             except Exception as e:
                 print(f"Error processing word {row.get('headword')}: {e}")
@@ -89,6 +180,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     level = args.level
-    
     os.makedirs("data/Anki", exist_ok=True)
     convert_to_anki(f"data/raw/level{level}.tsv", f"data/Anki/level{level}_import.tsv")

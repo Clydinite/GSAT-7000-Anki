@@ -1,0 +1,21 @@
+<div class="flashcard front-card">
+  <div class="header">
+    <span class="badge">Vocabulary</span>
+    <h1 class="headword">{{Front}}</h1>
+    <div style="display:none;">{{tts en_US:Front}}</div>
+  </div>
+</div>
+<script>
+window.playTTS = function(text) {
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = 0.9;
+  const voices = window.speechSynthesis.getVoices();
+  const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) 
+                      || voices.find(v => v.lang.startsWith('en'));
+  if (preferredVoice) utterance.voice = preferredVoice;
+  window.speechSynthesis.speak(utterance);
+};
+window.speechSynthesis.getVoices();
+</script>

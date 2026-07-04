@@ -1,0 +1,57 @@
+<div class="flashcard back-card">
+  <div class="header">
+    <span class="badge">Vocabulary</span>
+    <h1 class="headword">{{Front}}</h1>
+    <div style="display:none;">{{tts en_US:Front}}</div>
+  </div>
+  <hr class="separator">
+  <div class="content-area">
+    {{Back}}
+  </div>
+</div>
+<script>
+(function() {
+  // Unified shadcn accordion initializer
+  const metaSections = document.querySelectorAll('.meta-section');
+  metaSections.forEach((section) => {
+    const trigger = document.createElement('button');
+    trigger.className = 'accordion-trigger';
+    
+    const labelText = "Reveal Notes";
+    
+    trigger.innerHTML = `<span>${labelText}</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+    section.classList.add('accordion-content');
+
+    trigger.onclick = (e) => {
+      e.preventDefault();
+      const isExpanded = trigger.classList.toggle('active');
+      section.classList.toggle('expanded');
+    };
+    section.parentNode.insertBefore(trigger, section);
+  });
+
+  // Sense Reveal logic
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList.contains('sense-reveal-btn')) {
+      const group = e.target.closest('.sense-group');
+      if (group) {
+        group.classList.toggle('expanded');
+      }
+    }
+  });
+})();
+
+// TTS Engine
+window.playTTS = function(text) {
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = 0.9;
+  const voices = window.speechSynthesis.getVoices();
+  const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) 
+                      || voices.find(v => v.lang.startsWith('en'));
+  if (preferredVoice) utterance.voice = preferredVoice;
+  window.speechSynthesis.speak(utterance);
+};
+window.speechSynthesis.getVoices();
+</script>
