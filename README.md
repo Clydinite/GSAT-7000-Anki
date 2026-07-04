@@ -25,6 +25,10 @@ The cards are currently under development. I would appreciate support on additio
         - Example sentences with translations
         - Synonyms and Antonyms
 
+![Card Backside](images/backside.png)
+![Sense Reveal](images/sense_reveal.png)
+![Meta Section](images/meta_section.png)
+
 ## Card Status
 
 Currently I have completed the following cards (on this branch):
