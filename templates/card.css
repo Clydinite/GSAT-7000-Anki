@@ -374,22 +374,18 @@ button, input, select, textarea {
 .entry-header {
   display: flex;
   align-items: baseline;
-  flex-wrap: nowrap;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 10px;
   width: 100%;
-  overflow-x: scroll;
-  
-  /*  Hides scrollbar for Chrome, Safari, Opera, and Anki Desktop (Webkit) */
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  /* Hides scrollbar for Firefox */
-  scrollbar-width: none;
-  /* Hides scrollbar for IE and old Edge */
-  -ms-overflow-style: none;
 }
 
+.entry-text-group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+}
 .entry-header > span {
   flex-shrink: 0; 
 }

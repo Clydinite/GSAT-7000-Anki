@@ -121,8 +121,10 @@ def generate_html(card: Flashcard) -> str:
                 pos_class = f"pos-{entry.pos.value.lower()}"
                 html_parts.append('<div class="entry-header">')
                 html_parts.append(f'<span class="pos-badge {pos_class}">{POS_ABBREV.get(entry.pos.value.lower(), entry.pos.value.lower())}</span>')
+                html_parts.append('<div class="entry-text-group">')
                 html_parts.append(f'<span class="entry-pattern">{html.escape(entry.pattern)}</span>')
                 html_parts.append(f'<span class="entry-translation">{html.escape(entry.translation)}</span>')
+                html_parts.append('</div>')
                 html_parts.append('</div>')
                 
                 if entry.explanation:
