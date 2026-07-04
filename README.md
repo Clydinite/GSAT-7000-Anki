@@ -36,7 +36,7 @@ Currently I have completed the following cards (on this branch):
 - Level 5 - 200/1002
 - Level 6 - 0/1008
 
-The remaining levels are yet to be generated. You can help by generating cards for any level (probably level 5 would be the best). Simply change the `level` variable in the script. However, a Gemini API key is required (change the `.env.example` to `.env` and fill in the API key), which can be obtained for free on [Google AI Studio](https://aistudio.google.com/api-keys).
+The remaining levels are yet to be generated. You can help by generating cards for any level (probably level 5 would be the best). Simply use the `--level X` flag on `python process.py` (e.g. `python process.py --level 5`). However, a Gemini API key is required (change the `.env.example` to `.env` and fill in the API key), which can be obtained for free on [Google AI Studio](https://aistudio.google.com/api-keys).
 
 All sentences are marked with `<pattern> ... </pattern>` and `<target> ... </target>` tags. The target words are marked with `<target> ... </target>` tags, while the collocation words are marked with `<pattern> ... </pattern>` tags.
 
