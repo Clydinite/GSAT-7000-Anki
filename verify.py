@@ -3,6 +3,7 @@ import os
 import csv
 import time
 import asyncio
+import random
 import argparse
 from typing import List, Optional, Dict, Any, Tuple
 from google import genai
@@ -109,6 +110,8 @@ async def audit_chunk_slot(
 ):
     """Executes a batch audit using a strict semaphore-controlled async slot wrapper."""
     async with semaphore:
+        # Random jitter to avoid thundering herd when slots open up
+        await asyncio.sleep(random.uniform(0, 3))
         batch_items = [rows[idx] for idx in batch_idx_chunk]
         timestamp = time.strftime("%H:%M:%S")
         print(f"[{timestamp}] Processing batch {batch_num} of {total_batches}...")

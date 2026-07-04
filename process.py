@@ -5,6 +5,7 @@ import asyncio
 import os
 import csv
 import time
+import random
 from typing import List, Tuple, Optional
 from google import genai
 from google.genai import types
@@ -105,6 +106,8 @@ async def process_chunk(client, chunk: List[str], human_examples: List[Tuple[str
 async def worker_pool_slot(semaphore: asyncio.Semaphore, client, chunk: List[str], human_examples: List[Tuple[str, Flashcard]], file_lock: asyncio.Lock, chunk_idx: int, total_chunks: int):
     """Acquires a slot from the semaphore to guarantee exactly 5 tasks run concurrently."""
     async with semaphore:
+        # Random jitter to avoid thundering herd when slots open up
+        await asyncio.sleep(random.uniform(0, 3))
         await process_chunk(client, chunk, human_examples, file_lock, chunk_idx, total_chunks)
 
 async def main():
