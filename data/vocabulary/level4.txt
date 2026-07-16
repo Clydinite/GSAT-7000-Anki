@@ -103,7 +103,7 @@ bond n./v.
 bounce v./n.
 bracelet n.
 breed n./v.
-bridegroom/groom n.
+bridegroom n.
 broke adj.
 broom n.
 brutal adj.
