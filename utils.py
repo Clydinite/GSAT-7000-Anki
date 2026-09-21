@@ -35,7 +35,7 @@ class Conjugations(BaseModel):
     past_participle: str = Field(..., description="Past participle")
     
 class Relatives(BaseModel):
-    morphology: Optional[str] = Field(..., description="The morphology of the headword, null if monomorphemic, obscure, or that it's unhelpful to a student")
+    morphology: Optional[str] = Field(None, description="The morphology of the headword, null if monomorphemic, obscure, or that it's unhelpful to a student")
     related: List[WordPosTranslation]
 
 class Sentence(BaseModel):
@@ -48,7 +48,7 @@ class Entry(BaseModel):
     translation: str = Field(..., description="Traditional Chinese translation")
     explanation: Optional[str] = Field(None, description="Usage/Grammar note in Traditional Chinese")
     sentences: List[Sentence]
-    tier: Literal["primary", "secondary", "tertiary", "untestable"] = Field(..., description="Tier: primary (must know, max 1 primary sense per word / primary pattern per sense), secondary (should know), tertiary (could know), untestable (informal, regional, archaic)")
+    tier: Optional[Literal["primary", "secondary", "tertiary", "untestable"]] = Field(None, description="Tier: primary (must know, max 1 primary sense per word / primary pattern per sense), secondary (should know), tertiary (could know), untestable (informal, regional, archaic)")
 
 class Sense(BaseModel):
     sense: str = Field(..., description="Core meaning in Traditional Chinese")
@@ -56,7 +56,7 @@ class Sense(BaseModel):
     entries: List[Entry]
     synonyms: List[WordPosTranslation] = Field(default_factory=list)
     antonyms: List[WordPosTranslation] = Field(default_factory=list)
-    tier: Literal["primary", "secondary", "tertiary", "untestable"] = Field(..., description="Tier: primary (must know, max 1 primary sense per word), secondary, tertiary, untestable")
+    tier: Optional[Literal["primary", "secondary", "tertiary", "untestable"]] = Field(None, description="Tier: primary (must know, max 1 primary sense per word), secondary, tertiary, untestable")
 
 class Flashcard(BaseModel):
     headword: str = Field(..., description="Headword")
@@ -536,10 +536,11 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
             Flashcard.model_validate(
                 {
                     "headword": "caterpillar",
-                    "tier": "primary",
+                    "explanation": "可數名詞，指毛毛蟲。",
                     "senses": [
                         {
                             "sense": "毛毛蟲",
+                            "tier": "primary",
                             "entries": [
                                 {
                                     "pattern": "caterpillar",
