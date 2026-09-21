@@ -229,7 +229,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
             Flashcard.model_validate(
                 {
                     "headword": "object",
-                    "explanation": "「object」在學測中為核心必考字彙。名詞與動詞的語意、用法截然不同。名詞包含具體的「物理實體」與抽象的「行動目標/情感對象」，動詞則主要為「反對」。將其拆分為三大獨立語意區塊以利高效率、原子化記憶。",
+                    "explanation": "「object」在學測中為核心必考字彙。名詞與動詞的語意、用法截然不同。名詞包含具體的「物理實體」與抽象的「行動目標/情感對象」，動詞則主要為「反對」。",
                     "senses": [
                         {
                             "sense": "物體；物品",
@@ -290,7 +290,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                     "pattern": "an object of affection/desire/pity",
                                     "pos": "noun",
                                     "translation": "（某種情感或行為的）對象、目標",
-                                    "explanation": "指成為他人特定情感（如喜愛、渴望、憐憫、嘲笑）投射的核心對象。為大考常見的高階固定搭配句型。",
+                                    "explanation": "指成為他人特定情感（如喜愛、渴望、憐憫、嘲笑）投射的核心對象。",
                                     "tier": "secondary",
                                     "sentences": [
                                         {
@@ -313,7 +313,6 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                         },
                         {
                             "sense": "反對；提出異議",
-                            "explanation": "對某事表示不贊同、抗議或提出異議。",
                             "tier": "secondary",
                             "entries": [
                                 {
@@ -379,7 +378,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
             Flashcard.model_validate(
                 {
                     "headword": "undergo",
-                    "explanation": "「undergo」在學測綜合測驗與文意選填中非常高頻。這個字高度依賴後方接續的名詞來決定中文翻譯（如轉變、手術、考驗等），學生必須學會辨識特定的核心名詞搭配來解題。",
+                    "explanation": "「undergo」這個字高度依賴後方接續的名詞來決定中文翻譯（如轉變、手術、考驗等），學生必須學會辨識特定的核心名詞搭配來解題。",
                     "senses": [
                         {
                             "sense": "經歷；遭受",
@@ -537,7 +536,6 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
             Flashcard.model_validate(
                 {
                     "headword": "caterpillar",
-                    "explanation": "「caterpillar」在生物、自然生態類閱讀測驗中是基礎核心名詞。",
                     "tier": "primary",
                     "senses": [
                         {
@@ -547,7 +545,6 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                     "pattern": "caterpillar",
                                     "pos": "noun",
                                     "translation": "毛毛蟲",
-                                    "explanation": "常用形容詞修飾其外觀特徵，出現在自然生態描寫中。",
                                     "tier": "primary",
                                     "sentences": [
                                         {
