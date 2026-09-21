@@ -48,6 +48,7 @@ class Entry(BaseModel):
     translation: str = Field(..., description="Traditional Chinese translation")
     explanation: Optional[str] = Field(None, description="Usage/Grammar note in Traditional Chinese")
     sentences: List[Sentence]
+    tier: Literal["primary", "secondary", "tertiary", "untestable"] = Field(..., description="Tier: primary (must know, max 1 primary sense per word / primary pattern per sense), secondary (should know), tertiary (could know), untestable (informal, regional, archaic)")
 
 class Sense(BaseModel):
     sense: str = Field(..., description="Core meaning in Traditional Chinese")
@@ -55,6 +56,7 @@ class Sense(BaseModel):
     entries: List[Entry]
     synonyms: List[WordPosTranslation] = Field(default_factory=list)
     antonyms: List[WordPosTranslation] = Field(default_factory=list)
+    tier: Literal["primary", "secondary", "tertiary", "untestable"] = Field(..., description="Tier: primary (must know, max 1 primary sense per word), secondary, tertiary, untestable")
 
 class Flashcard(BaseModel):
     headword: str = Field(..., description="Headword")
@@ -112,12 +114,18 @@ Rules:
 Fields Guide:
 - headword: The base form of the word. Do not include any POS tags, parentheses, or suffix variations here (e.g., use "achieve", not "achieve (v.)" or "achieve(ment)").
 - explanation: A high-value usage note in Traditional Chinese focusing on syntax, common errors, or core conceptual metaphors. Avoid filler words or explicitly mentioning the acronym "GSAT".
-- senses: A list of core semantic clusters. Please split the meanings into separate senses if they would not be considered related by a student. Different part-of-speech of the same concept should be considered the same sense if it's logically related (hammer n. vs. hammer v.).
+- senses: A list of core semantic clusters. Please split the meanings into separate senses if they would not be considered related by a student. Different part-of-speech of the same concept should be considered the same sense if it's logically related (hammer n. vs. hammer v.). 
+    - tier: Must be one of ["primary", "secondary", "tertiary", "untestable"]. 
+        - "primary": Must know. Exactly one core primary sense per headword (or primary sense(s) crucial for the main meaning), and the essential high-yield collocation pattern(s) for that sense.
+        - "secondary": Should know. Important secondary definitions and standard exam-frequency collocations.
+        - "tertiary": Could know. Peripheral, less frequent nuances or specialized usages.
+        - "untestable": Informal, regional, archaic, slang, or obsolete variants.
 - entries: A list of distinct collocation patterns or phrases belonging to that specific sense.
     - pattern: The specific grammatical structure or formula (e.g., "accuse sb. of sth.", "object to sth./doing sth."). Please provide a significant amount of patterns to prepare the student for the test.
     - pos: The part of speech enum value matching the pattern.
     - explanation: A clear grammatical or contextual usage note in Traditional Chinese. Crucial: This field must remain plain text. Do not use Markdown styling (* or **) or XML tags (<target> or <pattern>) inside this specific field.
     - sentences: A list of example sentences matching the pattern.
+    - tier: The priority tier for this pattern ("primary", "secondary", "tertiary", "untestable").
         - Text Marking Rules: 
             - Wrap the exact inflected, conjugated, or derived form of the headword inside `<target>...</target>` tags. The entire word variant must be enclosed (e.g., `<target>accused</target>`, NOT `<target>accuse</target>d`). Never span this tag across multiple words.
             - Wrap the essential accompanying elements of the collocation formula (such as fixed prepositions, dependent verbs, or nouns) inside `<pattern>...</pattern>` tags. Never wrap the headword itself in pattern tags.
@@ -142,12 +150,14 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                         {
                             "sense": "預測；預言",
                             "explanation": "根據已知跡象或數據推測未來之走向。",
+                            "tier": "primary",
                             "entries": [
                                 {
                                     "pattern": "predict sth.",
                                     "pos": "verb",
                                     "translation": "預測某事",
                                     "explanation": "及物動詞直接接受詞，受詞通常是天災、科學結果或未來動態。",
+                                    "tier": "primary",
                                     "sentences": [
                                         {
                                             "sentence": "By analyzing historical weather records, meteorologists can <target>predict</target> upcoming droughts months before they actually happen.",
@@ -164,6 +174,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                     "pos": "verb",
                                     "translation": "預測…（後接子句）",
                                     "explanation": "動詞後接名詞子句，用來交代一整串複雜的趨勢演變，在寫作論述中極為高頻。",
+                                    "tier": "secondary",
                                     "sentences": [
                                         {
                                             "sentence": "Based on current economic data, experts <target>predict</target> <pattern>that</pattern> global oil prices will rise rapidly during the next quarter.",
@@ -223,12 +234,14 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                         {
                             "sense": "物體；物品",
                             "explanation": "指物理上可見或存在的實體物件。",
+                            "tier": "primary",
                             "entries": [
                                 {
                                     "pattern": "object",
                                     "pos": "noun",
                                     "translation": "物體；實體",
                                     "explanation": "指肉眼可見或實體存在的單一物品。",
+                                    "tier": "primary",
                                     "sentences": [
                                         {
                                             "sentence": "When the lights went out, I stumbled in the pitch-black room and my foot struck a heavy, metallic <target>object</target> left on the floor.",
@@ -254,12 +267,14 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                         {
                             "sense": "目標；對象",
                             "explanation": "指行動的核心意圖，或情感投射的目標對象。",
+                            "tier": "secondary",
                             "entries": [
                                 {
                                     "pattern": "the object of sth.",
                                     "pos": "noun",
                                     "translation": "…的目的、目標",
                                     "explanation": "等同於 purpose 或 aim。在句中常作主詞或主要名詞片語，用以明確表明某項行動的核心目的。",
+                                    "tier": "primary",
                                     "sentences": [
                                         {
                                             "sentence": "The ultimate <target>object</target> <pattern>of</pattern> his grueling four-year medical training was finally realized when he opened his own clinic.",
@@ -276,6 +291,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                     "pos": "noun",
                                     "translation": "（某種情感或行為的）對象、目標",
                                     "explanation": "指成為他人特定情感（如喜愛、渴望、憐憫、嘲笑）投射的核心對象。為大考常見的高階固定搭配句型。",
+                                    "tier": "secondary",
                                     "sentences": [
                                         {
                                             "sentence": "For years, the young actress was the <target>object</target> <pattern>of</pattern> intense public affection and media attention.",
@@ -298,12 +314,14 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                         {
                             "sense": "反對；提出異議",
                             "explanation": "對某事表示不贊同、抗議或提出異議。",
+                            "tier": "secondary",
                             "entries": [
                                 {
                                     "pattern": "object to sth./doing sth.",
                                     "pos": "verb",
                                     "translation": "反對某事／反對做某事",
                                     "explanation": "這裡的 to 是介系詞，因此後面如果接動詞，必須使用動名詞 (V-ing) 或直接接名詞。此語意與用法為學測片語大熱門。",
+                                    "tier": "secondary",
                                     "sentences": [
                                         {
                                             "sentence": "Because they loved nature and hated pollution, many local residents strongly <target>objected</target> <pattern>to</pattern> building a chemical plant near their neighborhood.",
@@ -320,6 +338,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                     "pos": "verb",
                                     "translation": "提出異議認為…；反對說…",
                                     "explanation": "後接名詞子句（that 子句），用來具體敘述反對的理由或論點，多用於閱讀測驗中的論辯語境。",
+                                    "tier": "tertiary",
                                     "sentences": [
                                         {
                                             "sentence": "While the mayor claimed the tax increase was necessary, angry citizens <target>objected</target> <pattern>that</pattern> it would unfairly hurt poor families who were already struggling.",
@@ -365,12 +384,14 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                         {
                             "sense": "經歷；遭受",
                             "explanation": "經歷巨大的變革、重大的醫療過程或痛苦的試煉。",
+                            "tier": "primary",
                             "entries": [
                                 {
                                     "pattern": "undergo a change / transformation",
                                     "pos": "verb",
                                     "translation": "經歷轉變／變革",
                                     "explanation": "常用於描述社會、城市、產業系統的大幅演變與進化歷史。",
+                                    "tier": "primary",
                                     "sentences": [
                                         {
                                             "sentence": "Over the past decade, the sleepy traditional farming village has <target>undergone</target> a complete <pattern>transformation</pattern> into a bustling high-tech valley.",
@@ -387,6 +408,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                     "pos": "verb",
                                     "translation": "接受手術／治療",
                                     "explanation": "醫療情境的強搭配。注意英文中病患做主詞時用主動態的 undergo 表示「經歷」，而非被動態。",
+                                    "tier": "secondary",
                                     "sentences": [
                                         {
                                             "sentence": "The star athlete had to <target>undergo</target> emergency knee <pattern>surgery</pattern> after tearing his ligament, putting an end to his season.",
@@ -442,12 +464,14 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                     {
                         "sense": "遠端地；遙遠地",
                         "explanation": "指在空間上透過技術或網絡進行的隔空操作。",
+                        "tier": "primary",
                         "entries": [
                             {
                                 "pattern": "work / control remotely",
                                 "pos": "adverb",
                                 "translation": "遠端工作／遙控",
                                 "explanation": "用來修飾動詞，指不需要親臨現場，而是透過網絡或技術進行操作。",
+                                "tier": "primary",
                                 "sentences": [
                                     {
                                         "sentence": "Thanks to high-speed internet, engineering teams can now seamlessly cooperate and work <target>remotely</target> from different continents.",
@@ -466,12 +490,14 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                     {
                         "sense": "絲毫；根本",
                         "explanation": "常用於否定句中，用以強烈地加強否定語氣。",
+                        "tier": "secondary",
                         "entries": [
                             {
                                 "pattern": "not remotely adj.",
                                 "pos": "adverb",
                                 "translation": "絲毫（不）…；根本（不）…",
                                 "explanation": "常用於搭配形容詞，形成強烈的否定對比，語氣等同於 not at all 或 not in the least。",
+                                "tier": "primary",
                                 "sentences": [
                                     {
                                         "sentence": "The two movies share a similar historical setting, but their plots are <pattern>not</pattern> <target>remotely</target> <pattern>similar</pattern> to each other.",
@@ -512,6 +538,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                 {
                     "headword": "caterpillar",
                     "explanation": "「caterpillar」在生物、自然生態類閱讀測驗中是基礎核心名詞。",
+                    "tier": "primary",
                     "senses": [
                         {
                             "sense": "毛毛蟲",
@@ -521,6 +548,7 @@ def get_few_shots() -> List[Tuple[str, Flashcard]]:
                                     "pos": "noun",
                                     "translation": "毛毛蟲",
                                     "explanation": "常用形容詞修飾其外觀特徵，出現在自然生態描寫中。",
+                                    "tier": "primary",
                                     "sentences": [
                                         {
                                             "sentence": "The children observed a bright green <target>caterpillar</target> slowly crawling across the surface of a large oak leaf.",
