@@ -182,7 +182,6 @@ async def migrate_chunk_slot(
                                     entry.tier = "primary"
 
                         rows[row_idx]["response"] = card_data.model_dump_json()
-                        rows[row_idx]["attempts"] = str(int(rows[row_idx].get("attempts", 0)) + 1)
                         counter_dict["updated_count"] += 1
                     
                     await asyncio.to_thread(write_entire_tsv, file_path, fieldnames, rows)
