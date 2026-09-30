@@ -17,7 +17,7 @@ load_dotenv()
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY"), 
     http_options={
-        "timeout": 180_000
+        "timeout": 60_000
     }
 )
 
@@ -70,7 +70,8 @@ def get_relevant_few_shot_tier_data() -> str:
     return output
 
 async def migrate_batch_async(few_shot: str, batch_items: List[Dict[str, Any]]) -> Optional[BatchMigrationResult]:
-    prompt = f"{few_shot}\n\n### BATCH TO MIGRATE:\n"
+    count = len(batch_items)
+    prompt = f"{few_shot}\n\n### BATCH TO MIGRATE (TOTAL: {count}, OUTPUT A TOTAL OF {count} MIGRATION RESULTS):\n"
     for i, item in enumerate(batch_items):
         prompt += f"Card {i+1} ({item['headword']}):\n"
         for s in item['senses']:
@@ -81,14 +82,13 @@ async def migrate_batch_async(few_shot: str, batch_items: List[Dict[str, Any]]) 
     
     try:
         response = await client.aio.models.generate_content(
-            model="gemma-4-31b-it",
+            model="gemma-4-26b-a4b-it",
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=MIGRATION_SYSTEM_PROMPT,
                 response_mime_type="application/json",
                 response_schema=BatchMigrationResult,
-                temperature=0.2,
-                thinking_config=types.ThinkingConfig(thinking_level="high") # type: ignore
+                temperature=0.2
             ),
         )
         return response.parsed # type: ignore
