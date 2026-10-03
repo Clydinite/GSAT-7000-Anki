@@ -10,6 +10,7 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 from utils import BatchFlashcard, SYSTEM_PROMPT, get_common_parser, get_few_shots, Flashcard
+from verify import AUDITOR_FAILURE_CHECKLIST
 
 load_dotenv()
 
@@ -33,11 +34,17 @@ Your goal is to FIX cards that have already failed a strict quality audit.
 - NEVER include any conversational explanation.
 - DO NOT CHANGE ANY FIELDS UNLESS THEY ARE PART OF THE FIX.
 
+### NOTE:
+Be aware that some of the cards have no Auditor's feedback included. This means that the card is flagged manually by a human. Please find the error and fix it.
+
 ### SCHEMA REFERENCE:
 {Flashcard.model_json_schema()}
 
 Original System Prompt for reference:
 {SYSTEM_PROMPT}
+
+Auditor's Failure Checklist for reference:
+{AUDITOR_FAILURE_CHECKLIST}
 """
 
 async def edit_batch_async(batch_items: List[Dict[str, str]]) -> Optional[BatchFlashcard]:
@@ -137,10 +144,13 @@ async def main_async() -> None:
     parser = get_common_parser("Level of audited cards to actually fix.")
     parser.add_argument("--batch-size", "-b", type=int, default=1, help="Batch size for processing.")
     parser.add_argument("--worker-count", "-w", type=int, default=5, help="Number of concurrent workers.")
+    parser.add_argument("--manual", "-m", type=str, nargs='+', default=[], help="List of headwords to manually fix in the level. Please be aware that cross level fixes are currently not supported.")
     args = parser.parse_args()
     
     edit_level = args.level
     batch_size = args.batch_size
+    manual_fixes: List[str] = args.manual
+    
     workers = args.worker_count
 
     file_path = f"data/raw/level{edit_level}.tsv"
@@ -158,11 +168,19 @@ async def main_async() -> None:
 
     if not fieldnames: 
         return
+    
+    if manual_fixes:
+        print("Applying manual fixes...")
+    
+    # See if manual fixes are valid
+    for manual_fix in manual_fixes:
+        if not manual_fix in [r.get("headword") for r in rows]:
+            print(f"Error: Word {manual_fix} was not found in TSV file.")
 
-    # Target cards marked ai_fail with less than or equal to 3 attempts
+    # Target cards marked ai_fail with less than or equal to 3 attempts, or if it is already flagged for manual fix
     pending_indices = [
         i for i, r in enumerate(rows) 
-        if r.get("verification") == "ai_fail" and int(r.get("attempts", 0)) <= 3
+        if (r.get("verification") == "ai_fail" and int(r.get("attempts", 0)) <= 3) or (r.get("headword") in manual_fixes)
     ]
     
     total_pending = len(pending_indices)
