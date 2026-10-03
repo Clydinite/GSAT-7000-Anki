@@ -380,8 +380,7 @@ hard adj./adv.
 hat n.
 hate v./n.
 have aux./v.
-he (him, his, himself)
-pron.
+he (him, his, himself) pron.
 head n./v.
 headache n.
 health n.
@@ -422,8 +421,7 @@ hundred n./adj.
 hungry adj.
 hurt v./n.
 husband n.
-I (me, my, mine, myself)
-pron.
+I (me, my, mine, myself) pron.
 ice n.
 idea n.
 if conj.
@@ -763,8 +761,7 @@ shall aux.
 shape n.
 share v./n.
 sharp adj./adv.
-she (her, hers, herself)
-pron.
+she (her, hers, herself) pron.
 sheep n.
 ship n./v.
 shirt n.
@@ -804,8 +801,7 @@ so adv./conj.
 sofa n.
 soldier n.
 some adj./pron.
-someone/somebody
-pron./n.
+someone/somebody pron./n.
 something pron./n.
 sometimes adv.
 somewhere adv.
@@ -880,9 +876,7 @@ theater n.
 then adv./adj.
 there adv./n.
 these pron./adj.
-they (them, their,
-theirs, themselves)
-pron.
+they (them, their, theirs, themselves) pron.
 thick adj.
 thin adj.
 thing n.
@@ -958,8 +952,7 @@ watch v./n.
 water n./v.
 wave n./v.
 way n.
-we (us, our, ours,
-ourselves) pron.
+we (us, our, ours, ourselves) pron.
 weak adj.
 wear v.
 weather n./v.
@@ -1005,9 +998,7 @@ yellow adj./n./v.
 yes/yeah adv./n.
 yesterday adv./n.
 yet adv./conj.
-you (your, yours,
-yourself, yourselves)
-pron.
+you (your, yours, yourself, yourselves) pron.
 young adj./n.
 zero n.
 zoo n.

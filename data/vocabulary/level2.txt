@@ -120,7 +120,7 @@ cabbage n.
 café/cafe n.
 cage n./v.
 calendar n.
-calm v./adj./n
+calm v./adj./n.
 camel n.
 cancel v.
 cancer n.
@@ -572,8 +572,7 @@ necklace n.
 needle n.
 negative adj./n.
 neighbor n.
-neither adj./adv./pron./
-conj.
+neither adj./adv./pron./conj.
 nephew n.
 nerve n.
 nervous adj.

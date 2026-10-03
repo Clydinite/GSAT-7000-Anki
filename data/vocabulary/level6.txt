@@ -135,9 +135,7 @@ cement n./v.
 census n.
 ceramic adj./n.
 certify v.
-chairperson/chair/
-chairman/
-chairwoman n.
+chairperson/chair/chairman/chairwoman n.
 champagne n.
 chant n./v.
 charitable adj.
@@ -847,9 +845,7 @@ sparrow n.
 spectacle n.
 spiral adj./n./v.
 splendor n.
-spokesperson/
-spokesman/
-spokeswoman n.
+spokesperson/spokesman/spokeswoman n.
 spontaneous adj.
 sportsman/sportswoman n.
 sportsmanship n.
@@ -942,8 +938,7 @@ twinkle n./v.
 unanimous adj.
 unconditional adj.
 underestimate v./n.
-underneath
-prep./adv./n./adj.
+underneath prep./adv./n./adj.
 underpass n.
 underway adv.
 unification n.
