@@ -112,6 +112,7 @@ def write_entire_tsv(file_path: str, fieldnames: List[str], rows: List[Dict[str,
     """Helper used to safely execute blocking disk serialization inside an OS threadpool."""
     with open(file_path, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
+        writer.writeheader()
         writer.writerows(rows)
 
 async def audit_chunk_slot(
