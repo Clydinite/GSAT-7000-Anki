@@ -1,39 +1,61 @@
 # Anki GSAT Card Setup Guide
 
-## 1. Create Note Type
-- Create a Note Type `GSAT` with fields: `Front` and `Back`.
+## 0. Prerequisites
 
----
+- Install Anki
+- Launch the application
+
+## 1. Create Note Type
+
+- Click `Tool` (at the top left)
+- Click `Manage Note Types`
+- Click `Add` (this copies the Basic Note Type)
+- Click `OK`
+- Give it a name, say, `GSAT`
+- Select it in the menu
+- Click `Cards` on the right
 
 ## 2. Card Templates
 
 You can find the HTML and CSS templates in the `templates/` folder:
+
 - **`templates/front.html`**: Front template.
 - **`templates/back.html`**: Back template.
-- **`templates/card.css`**: Styling section.
+- **`templates/card.css`**: Styling.
 
 Copy the contents of these files directly into the corresponding sections of your Anki Note Type.
 
-## 3. Previewing Cards
-Instead of importing into Anki to preview, you can generate a static preview file:
-```bash
-python templates/preview.py
-```
-This generates `templates/preview.html`, which you can open in any browser to verify your CSS and layout.
+## 3. Import & Deck Organization
 
----
+The vocabulary is organized by levels. You can choose to import everything into one deck or create a separate deck for each level. Either way, you should still create a deck.
 
-## 4. Import & Deck Organization
+### Create a Deck
 
-The vocabulary is organized by levels. You can choose to import everything into one deck or create a separate deck for each level.
+1. Create a deck by clicking `Add` (at the top), then `Deck`, then `Add`
+2. Give it a name, say, `GSAT`
 
-### Importing to Separate Decks
-1. In Anki, go to **Import**.
-2. Select the level file (e.g., `data/Anki/level3_import.tsv`).
-3. In the Import dialog:
-   - **Type:** Select the `GSAT` Note Type you created in Step 1.
-   - **Deck:** Click the deck name and type a new name like `GSAT::Level 4` to create a sub-deck.
-   - **Options:** Ensure "Allow HTML in fields" is checked.
-4. Repeat for each level you wish to add.
+### Importing Data
 
-*Tip: Using the `::` syntax (e.g., `GSAT::Level 1`) allows you to keep all levels organized under a single parent "GSAT" deck.*
+Here, we will go through the process of importing Level 3 as an example.
+
+1. Create a subdeck by clicking `Add` (at the top), then `Deck`, then `Add`
+2. Give it a name, say, `GSAT::Level 3`, then `OK`, and `Close` (`deck::subdeck` creates a deck `subdeck` under `deck`)
+3. In Anki, click `Import File` (at the bottom)
+4. Select the level file (e.g., `data/Anki/level3_import.tsv`).
+5. In the `Import File` dialog:
+
+   - `File`
+  
+     - Check "Allow HTML in fields" (if it's unchecked)
+
+   - `Import Options`
+
+   ![Import options](images/import_options.png)
+
+     - **Note Type:** Select the `GSAT` Note Type created in Step 1
+     - **Deck:** Click the subdeck name you created
+     - **Existing Notes:** `Update`
+     - **Match Scope:** `Note Type`
+
+6. Click `Import`
+7. Repeat for each level you wish to add
